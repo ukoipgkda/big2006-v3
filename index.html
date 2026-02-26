@@ -1,80 +1,200 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-    body { background-color: #0f172a; font-family: 'Inter', sans-serif; color: #f1f5f9; }
-    .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
-    .gold-text { color: #fbbf24; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-BIG IPGKDA 48.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; }
+        .glass-box { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 24px;
+        }
+        .gold-text { color: #fbbf24; }
+        .input-dark {
+            background-color: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-dark:focus { border-color: #fbbf24; box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
-<body class="p-4 md:p-10">
-  <div id="login-screen" class="max-w-md mx-auto mt-20 glass p-8 text-center">
-    <h1 class="text-3xl font-black gold-text italic mb-6">e-BIG IPGKDA</h1>
-    <input type="text" id="ic-input" placeholder="No. Kad Pengenalan" class="w-full p-4 mb-4 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-yellow-500 outline-none">
-    <button onclick="handleLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition">LOG MASUK</button>
-  </div>
+<body class="flex items-center justify-center min-h-screen p-4 md:p-8">
 
-  <div id="main-dashboard" class="hidden max-w-5xl mx-auto glass p-8">
-    <div class="flex justify-between items-center mb-10">
-       <h2 id="user-welcome" class="text-2xl font-bold gold-text"></h2>
-       <button onclick="location.reload()" class="text-red-400 text-sm font-bold">LOG KELUAR</button>
+    <div id="login-screen" class="w-full max-w-md p-10 glass-box text-center shadow-2xl">
+        <h1 class="text-3xl font-black gold-text italic mb-2 tracking-tighter uppercase">e-BIG IPGKDA</h1>
+        <p class="text-[10px] text-gray-400 font-bold mb-8 tracking-widest uppercase">Unit Kokurikulum</p>
+        
+        <div class="space-y-6">
+            <input type="text" id="ic-input" 
+                class="w-full p-4 rounded-2xl input-dark text-center font-bold text-lg" 
+                placeholder="NO. KAD PENGENALAN">
+            
+            <button onclick="doLogin()" id="btn-login"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest transition-all">
+                Log Masuk
+            </button>
+        </div>
+        
+        <p id="error-msg" class="mt-4 text-red-400 text-xs font-bold hidden"></p>
+        <p class="footer-credit mt-10 text-[8px] text-gray-500 font-bold uppercase">Hakmilik Unit Kokurikulum IPGKDA</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-      <div id="chart-area" class="h-80 glass p-4"></div>
-      <div class="space-y-4">
-        <h3 class="gold-text font-bold">PEMARKAHAN CEPAT</h3>
-        <input type="number" id="m-total" placeholder="Masukkan Markah (0-100)" class="w-full p-4 rounded-xl bg-slate-800 border-none">
-        <button onclick="saveMark()" class="w-full bg-yellow-500 text-slate-900 font-black py-4 rounded-xl">SIMPAN & JANA GRED</button>
-        <button onclick="generatePDF()" class="w-full border border-yellow-500 text-yellow-500 font-bold py-4 rounded-xl mt-4">EKSPORT KE PDF</button>
-      </div>
+    <div id="dashboard-screen" class="w-full max-w-4xl glass-box p-8 hidden animate-fade-in">
+        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+            <h2 class="text-xl font-black gold-text italic uppercase">Profil Pelajar</h2>
+            <button onclick="location.reload()" class="bg-red-500/10 text-red-500 border border-red-500/20 font-bold text-[10px] px-4 py-2 rounded-xl uppercase hover:bg-red-500 hover:text-white transition-all">Log Keluar</button>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-10">
+            <div class="flex flex-col items-center">
+                <div class="w-48 h-64 bg-slate-800 rounded-3xl border-4 border-white/10 overflow-hidden shadow-2xl relative">
+                    <img id="display-img" class="w-full h-full object-cover hidden">
+                    <div id="img-placeholder" class="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                        <i class="fas fa-user-circle text-6xl mb-2"></i>
+                        <span class="text-[10px] font-bold">TIADA GAMBAR</span>
+                    </div>
+                </div>
+                <div class="mt-4 bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">Verified Student</div>
+            </div>
+
+            <div class="flex-1 space-y-6">
+                <div>
+                    <h3 id="display-nama" class="text-3xl font-black text-white uppercase leading-none">...</h3>
+                    <p id="display-ic" class="gold-text font-bold text-sm mt-2">IC: ...</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-900/50 rounded-2xl border border-white/5">
+                        <label class="text-[9px] font-black text-gray-500 uppercase block mb-1">Siri BIG</label>
+                        <p id="display-siri" class="font-bold text-white">-</p>
+                    </div>
+                    <div class="p-4 bg-slate-900/50 rounded-2xl border border-white/5">
+                        <label class="text-[9px] font-black text-gray-500 uppercase block mb-1">Kumpulan</label>
+                        <p id="display-kump" class="font-bold text-white">-</p>
+                    </div>
+                    <div class="p-4 bg-slate-900/50 rounded-2xl border border-white/5 col-span-2 md:col-span-1">
+                        <label class="text-[9px] font-black text-gray-500 uppercase block mb-1">Status Pendaftaran</label>
+                        <p class="font-bold text-green-400">AKTIF</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-4">
+                    <h4 class="text-xs font-black gold-text uppercase tracking-widest border-l-4 border-yellow-500 pl-3">Kemaskini Maklumat Amali</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-400 uppercase ml-2">No. Tel Waris</label>
+                            <input type="text" id="upd-tel" class="w-full p-4 rounded-xl input-dark font-bold text-sm" placeholder="Contoh: 017XXXXXXX">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-gray-400 uppercase ml-2">Alahan / Ubat</label>
+                            <input type="text" id="upd-alahan" class="w-full p-4 rounded-xl input-dark font-bold text-sm" placeholder="Tiada / Ada">
+                        </div>
+                    </div>
+                    
+                    <button onclick="updateStudentData()" id="btn-save" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-indigo-500 transition-all">Simpan Kemaskini</button>
+                </div>
+            </div>
+        </div>
+        <p class="text-center text-[8px] text-gray-600 font-bold uppercase mt-12 tracking-widest">Sistem e-BIG IPGKDA v48.0 | Powered by Google Apps Script</p>
     </div>
-  </div>
 
-  <script>
-    let userData = null;
-    const API_URL = "https://script.google.com/macros/s/AKfycbz3aR-N3pJ-wRldsYqZ_43n00THgK_6MHoSXC3AN2HgkZHw_v4oBYusJpmJcqCgkitL2g/exec"; // Gantian selepas deploy
+    <script>
+        // URL WEB APP ANDA
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxfaG5VInNW0Yu16mqTVI-RcdbTNBEqxelA3TBvcjYDRPh96iYacnOmxolOzbgi3Yu9/exec";
+        
+        let currentStudent = null;
 
-    async function handleLogin() {
-      const ic = document.getElementById('ic-input').value;
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({action: 'login_student', no_kp: ic})
-      });
-      const data = await res.json();
-      if(data.result === 'success') {
-        userData = data.data;
-        showDashboard();
-      } else { alert(data.message); }
-    }
+        async function doLogin() {
+            const icInput = document.getElementById('ic-input').value.trim();
+            const btn = document.getElementById('btn-login');
+            const err = document.getElementById('error-msg');
+            
+            if(!icInput) { alert("Sila masukkan No. Kad Pengenalan"); return; }
+            
+            btn.innerText = "MENYEMAK REKOD...";
+            btn.disabled = true;
+            err.classList.add('hidden');
 
-    function showDashboard() {
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('main-dashboard').classList.remove('hidden');
-      document.getElementById('user-welcome').innerText = "Hi, " + userData.nama;
-      renderBellCurve();
-    }
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'login_student', no_kp: icInput })
+                });
+                
+                const res = await response.json();
+                
+                if(res.result === 'success') {
+                    currentStudent = res.data;
+                    
+                    // TRANSISI SCREEN
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('dashboard-screen').classList.remove('hidden');
+                    
+                    // INJECT DATA
+                    document.getElementById('display-nama').innerText = res.data.nama;
+                    document.getElementById('display-ic').innerText = "NO. IC: " + res.data.no_kp;
+                    document.getElementById('display-siri').innerText = "SIRI " + (res.data.siri || "-");
+                    document.getElementById('display-kump').innerText = (res.data.nama_kump || "-") + " " + (res.data.no_kump || "");
+                    
+                    // GAMBAR
+                    if(res.data.url_gambar && res.data.url_gambar.length > 10) {
+                        const imgEl = document.getElementById('display-img');
+                        imgEl.src = res.data.url_gambar;
+                        imgEl.classList.remove('hidden');
+                        document.getElementById('img-placeholder').classList.add('hidden');
+                    }
+                } else {
+                    err.innerText = res.message;
+                    err.classList.remove('hidden');
+                }
+            } catch (e) {
+                err.innerText = "RALAT: Gagal berhubung dengan pangkalan data.";
+                err.classList.remove('hidden');
+                console.error(e);
+            } finally {
+                btn.innerText = "LOG MASUK";
+                btn.disabled = false;
+            }
+        }
 
-    function renderBellCurve() {
-      const x = Array.from({length: 100}, (_, i) => i);
-      const y = x.map(v => Math.exp(-0.5 * Math.pow((v - 70) / 10, 2))); // Contoh Curve
-      const trace = { x: x, y: y, type: 'scatter', fill: 'toself', line: {color: '#fbbf24'} };
-      Plotly.newPlot('chart-area', [trace], {
-        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-        font: {color: '#fff'}, margin: {t:20, b:40, l:30, r:10}
-      });
-    }
+        async function updateStudentData() {
+            const tel = document.getElementById('upd-tel').value;
+            const alahan = document.getElementById('upd-alahan').value;
+            const btn = document.getElementById('btn-save');
+            
+            btn.innerText = "MENYIMPAN...";
+            btn.disabled = true;
 
-    async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("LAPORAN RASMI e-BIG IPGKDA", 10, 10);
-      doc.text("Nama: " + userData.nama, 10, 20);
-      doc.save("Laporan_BIG.pdf");
-    }
-  </script>
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_student_info',
+                        no_kp: currentStudent.no_kp,
+                        tel_waris: tel,
+                        alahan: alahan
+                    })
+                });
+                const res = await response.json();
+                if(res.result === 'success') alert("Maklumat berjaya dikemaskini!");
+            } catch (e) {
+                alert("Gagal menyimpan data.");
+            } finally {
+                btn.innerText = "SIMPAN KEMASKINI";
+                btn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>

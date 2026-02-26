@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { background-color: #0f172a; font-family: 'Inter', sans-serif; color: #f1f5f9; }
+    .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+    .gold-text { color: #fbbf24; }
+  </style>
+</head>
+<body class="p-4 md:p-10">
+  <div id="login-screen" class="max-w-md mx-auto mt-20 glass p-8 text-center">
+    <h1 class="text-3xl font-black gold-text italic mb-6">e-BIG IPGKDA</h1>
+    <input type="text" id="ic-input" placeholder="No. Kad Pengenalan" class="w-full p-4 mb-4 rounded-xl bg-slate-800 border-none text-white focus:ring-2 focus:ring-yellow-500 outline-none">
+    <button onclick="handleLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition">LOG MASUK</button>
+  </div>
+
+  <div id="main-dashboard" class="hidden max-w-5xl mx-auto glass p-8">
+    <div class="flex justify-between items-center mb-10">
+       <h2 id="user-welcome" class="text-2xl font-bold gold-text"></h2>
+       <button onclick="location.reload()" class="text-red-400 text-sm font-bold">LOG KELUAR</button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div id="chart-area" class="h-80 glass p-4"></div>
+      <div class="space-y-4">
+        <h3 class="gold-text font-bold">PEMARKAHAN CEPAT</h3>
+        <input type="number" id="m-total" placeholder="Masukkan Markah (0-100)" class="w-full p-4 rounded-xl bg-slate-800 border-none">
+        <button onclick="saveMark()" class="w-full bg-yellow-500 text-slate-900 font-black py-4 rounded-xl">SIMPAN & JANA GRED</button>
+        <button onclick="generatePDF()" class="w-full border border-yellow-500 text-yellow-500 font-bold py-4 rounded-xl mt-4">EKSPORT KE PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let userData = null;
+    const API_URL = "URL_WEB_APP_ANDA_DI_SINI"; // Gantian selepas deploy
+
+    async function handleLogin() {
+      const ic = document.getElementById('ic-input').value;
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({action: 'login_student', no_kp: ic})
+      });
+      const data = await res.json();
+      if(data.result === 'success') {
+        userData = data.data;
+        showDashboard();
+      } else { alert(data.message); }
+    }
+
+    function showDashboard() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-dashboard').classList.remove('hidden');
+      document.getElementById('user-welcome').innerText = "Hi, " + userData.nama;
+      renderBellCurve();
+    }
+
+    function renderBellCurve() {
+      const x = Array.from({length: 100}, (_, i) => i);
+      const y = x.map(v => Math.exp(-0.5 * Math.pow((v - 70) / 10, 2))); // Contoh Curve
+      const trace = { x: x, y: y, type: 'scatter', fill: 'toself', line: {color: '#fbbf24'} };
+      Plotly.newPlot('chart-area', [trace], {
+        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+        font: {color: '#fff'}, margin: {t:20, b:40, l:30, r:10}
+      });
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("LAPORAN RASMI e-BIG IPGKDA", 10, 10);
+      doc.text("Nama: " + userData.nama, 10, 20);
+      doc.save("Laporan_BIG.pdf");
+    }
+  </script>
+</body>
+</html>

@@ -3,194 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-BIG IPGKDA | Scoring Matrix</title>
+    <title>e-BIG IPGKDA | Admin v50.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        :root { --gold: #fbbf24; --indigo-neon: #6366f1; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { background: radial-gradient(circle at top left, #1e1b4b, #0f172a, #0a0c10); font-family: 'Plus Jakarta Sans', sans-serif; color: #f1f5f9; min-height: 100vh; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem; }
-        .gold-glow { text-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
-        .btn-adj { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-adj:active { transform: scale(0.9); }
-        
-        /* Radar Animation */
-        .radar-sweep { animation: spin 2s linear infinite; border-top: 2px solid var(--indigo-neon); }
+        .gold-text { color: #fbbf24; }
+        .input-dark { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 1rem; padding: 1rem; width: 100%; outline: none; }
+        .input-dark:focus { border-color: #fbbf24; }
+        .radar-sweep { animation: spin 2s linear infinite; border-top: 2px solid #6366f1; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-fade { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body class="p-4 md:p-8 flex items-center justify-center">
+<body class="p-4 md:p-8">
 
     <div id="radar-overlay" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex flex-col items-center justify-center backdrop-blur-md">
         <div class="relative w-48 h-48 border-4 border-indigo-500/10 rounded-full flex items-center justify-center">
             <div class="absolute inset-0 border-4 border-indigo-500 rounded-full animate-ping opacity-20"></div>
             <div class="absolute inset-0 rounded-full radar-sweep"></div>
-            <i class="fas fa-microchip text-4xl text-indigo-400 animate-pulse"></i>
+            <i class="fas fa-satellite-dish text-4xl text-indigo-400"></i>
         </div>
-        <p class="mt-8 text-yellow-500 font-black tracking-[0.3em] uppercase italic animate-pulse">Syncing Matrix to Cloud...</p>
+        <p class="mt-8 gold-text font-black tracking-[0.3em] uppercase animate-pulse">Menyelaras Data Cloud...</p>
     </div>
 
-    <div class="w-full max-w-6xl space-y-6">
-        <div class="flex justify-between items-center glass-panel p-6 mb-4">
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <div class="glass-panel p-6 flex justify-between items-center shadow-2xl">
             <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                    <i class="fas fa-graduation-cap text-black"></i>
-                </div>
+                <div class="bg-yellow-500 p-3 rounded-2xl shadow-lg shadow-yellow-500/40"><i class="fas fa-shield-halved text-black"></i></div>
                 <div>
-                    <h1 class="text-xl font-extrabold gold-text italic gold-glow uppercase">Dashboard Penilaian BIG</h1>
-                    <p class="text-[9px] font-bold text-indigo-400 tracking-widest uppercase">Continuous Assessment Matrix v49.0</p>
+                    <h1 class="text-xl font-extrabold gold-text italic uppercase leading-none">Pusat Pemarkahan BIG</h1>
+                    <p class="text-[9px] text-indigo-400 font-bold tracking-widest uppercase mt-1">Sistem Matrix HP MQF 2.0</p>
                 </div>
             </div>
-            <div class="text-right">
-                <p class="text-[10px] text-gray-500 uppercase font-black">Grade Auto-Calc</p>
-                <div id="grand-grade" class="text-3xl font-black text-white">-</div>
-            </div>
+            <button onclick="location.reload()" class="bg-red-500/10 text-red-500 border border-red-500/20 px-5 py-2 rounded-xl text-[10px] font-black hover:bg-red-500 hover:text-white transition-all">LOG KELUAR</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-8 space-y-6">
+                <div class="glass-panel p-8 shadow-xl">
+                    <div class="flex flex-col md:flex-row gap-4 mb-8">
+                        <div class="flex-1">
+                            <label class="text-[10px] text-gray-500 font-black uppercase ml-1">Cari Nama Pelajar</label>
+                            <select id="sel-student" onchange="loadStudentInfo()" class="input-dark mt-2 font-bold cursor-pointer">
+                                <option value="">-- Pilih Pelajar --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <h3 class="text-xs font-black gold-text border-l-4 border-yellow-500 pl-3 uppercase">HPK1 & HPK2 (Kuiz & Sahsiah)</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-[9px] font-bold text-gray-500">KUIZ 1 (5%)</label><input type="number" id="k1" class="input-dark mt-1" step="0.1"></div>
+                                <div><label class="text-[9px] font-bold text-gray-500">KUIZ 2 (5%)</label><input type="number" id="k2" class="input-dark mt-1" step="0.1"></div>
+                                <div><label class="text-[9px] font-bold text-gray-500">HP4 (10%)</label><input type="number" id="hp4" class="input-dark mt-1" step="0.1"></div>
+                                <div><label class="text-[9px] font-bold text-gray-500">HP5 (10%)</label><input type="number" id="hp5" class="input-dark mt-1" step="0.1"></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <h3 class="text-xs font-black text-indigo-400 border-l-4 border-indigo-500 pl-3 uppercase">HPK3 (Amali II - 70%)</h3>
+                            <div class="grid grid-cols-1 gap-4">
+                                <div><label class="text-[9px] font-bold text-gray-500">HP3 - PRAKTIKAL (25%)</label><input type="number" id="hp3" class="input-dark mt-1" placeholder="Mula drpd 49% default"></div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-[9px] font-bold text-gray-500">HP8 - INDIVIDU</label><input type="number" id="hp8i" class="input-dark mt-1"></div>
+                                    <div><label class="text-[9px] font-bold text-gray-500">HP8 - KUMPULAN</label><input type="number" id="hp8k" class="input-dark mt-1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-6 bg-red-500/5 rounded-3xl border border-red-500/10">
+                        <label class="text-[10px] text-red-400 font-black uppercase">Penalti Demerit (Akan mengurangkan jumlah HP)</label>
+                        <input type="number" id="demerit" class="input-dark mt-2 border-red-500/20 text-red-400 font-black" placeholder="0.00">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                        <button onclick="resetForm()" class="bg-slate-800 hover:bg-slate-700 p-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all">
+                            <i class="fas fa-undo-alt mr-2"></i> Reset Borang
+                        </button>
+                        <button onclick="saveMark()" class="bg-yellow-500 hover:bg-yellow-400 text-black p-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-yellow-500/20 transition-all">
+                            <i class="fas fa-cloud-upload-alt mr-2"></i> Simpan Pemarkahan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass-panel p-6">
-                    <h3 class="text-[10px] font-black text-indigo-300 uppercase mb-4 tracking-widest"><i class="fas fa-filter mr-2"></i>Filter Pelajar</h3>
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <select id="filter-kelas" class="p-3 bg-slate-950 border border-white/10 rounded-xl text-[10px] font-bold text-white outline-none">
-                            <option value="">SEMUA KELAS</option>
-                            <option value="BM1">BM1</option>
-                        </select>
-                        <select id="filter-kump" class="p-3 bg-slate-950 border border-white/10 rounded-xl text-[10px] font-bold text-white outline-none">
-                            <option value="">KUMPULAN</option>
-                            <option value="GREY">GREY</option>
+                <div class="glass-panel p-6 shadow-xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xs font-black gold-text uppercase italic">Statistik Gred</h3>
+                        <select id="filter-kelas-summary" onchange="renderSummary()" class="bg-slate-950 text-[10px] p-2 rounded-lg border border-white/10 outline-none">
+                            <option value="SEMUA">SEMUA KELAS</option>
                         </select>
                     </div>
-                    <select id="sel-student" onchange="loadStudent()" class="w-full p-4 bg-slate-950 border border-white/10 rounded-xl text-xs font-bold text-white outline-none">
-                        <option value="">Pilih Nama Pelajar...</option>
-                        <option value="1">AHMAD SALIHIN BIN TAUFEK</option>
-                        <option value="2">AMIRAH NUR DIYANA BINTI MOHD NASIR</option>
-                    </select>
+                    
+                    <div id="grade-chart" class="h-64 w-full"></div>
 
-                    <div id="std-preview" class="mt-8 text-center hidden animate-fade-in">
-                        <div class="w-32 h-32 mx-auto rounded-[2rem] border-4 border-yellow-500 p-1 mb-4 shadow-xl">
-                            <img id="view-img" src="https://via.placeholder.com/150" class="w-full h-full object-cover rounded-[1.8rem]">
+                    <div id="summary-stat" class="mt-6 space-y-3">
+                        <div class="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex justify-between items-center">
+                            <span class="text-[10px] font-black text-green-400 uppercase">Jumlah Gred A</span>
+                            <span id="count-a" class="text-2xl font-black text-white">0</span>
                         </div>
-                        <h4 id="view-name" class="font-extrabold text-white uppercase text-xs">NAMA PELAJAR</h4>
-                        <div class="mt-4 flex justify-center gap-2">
-                            <span class="text-[8px] bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/20 uppercase font-black">HPK1/2/3 Verified</span>
+                        <div id="student-status" class="text-[9px] text-gray-500 font-bold uppercase text-center tracking-widest">
+                            Sistem sedia menerima data
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-8 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="glass-panel p-5 border-l-4 border-yellow-500">
-                        <p class="text-[9px] font-black text-gray-500 uppercase mb-3">CLO1 / HPK1 (10%)</p>
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-[10px] mb-1 font-bold"><span>Kuiz I</span><span id="v-k1">0</span>/5</div>
-                                <input type="range" id="k1" min="0" max="5" step="0.5" value="0" oninput="calcAll()" class="w-full accent-yellow-500">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[10px] mb-1 font-bold"><span>Kuiz II</span><span id="v-k2">0</span>/5</div>
-                                <input type="range" id="k2" min="0" max="5" step="0.5" value="0" oninput="calcAll()" class="w-full accent-yellow-500">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel p-5 border-l-4 border-indigo-500">
-                        <p class="text-[9px] font-black text-gray-500 uppercase mb-3">CLO2 / HPK2 (20%)</p>
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-[10px] mb-1 font-bold"><span>HP4 (Interpersonal)</span><span id="v-hp4">0</span>/10</div>
-                                <input type="range" id="hp4" min="0" max="10" step="0.5" value="0" oninput="calcAll()" class="w-full accent-indigo-500">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-[10px] mb-1 font-bold"><span>HP5 (Komunikasi)</span><span id="v-hp5">0</span>/10</div>
-                                <input type="range" id="hp5" min="0" max="10" step="0.5" value="0" oninput="calcAll()" class="w-full accent-indigo-500">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel p-5 border-l-4 border-green-500">
-                        <p class="text-[9px] font-black text-gray-500 uppercase mb-3">CLO3 / HPK3 (70%)</p>
-                        <div class="flex flex-col items-center justify-center h-full pb-4">
-                            <div class="text-4xl font-black text-white" id="v-amali2">49.00</div>
-                            <p class="text-[8px] text-green-500 font-bold tracking-widest uppercase">Current: 70% Default</p>
-                            <div class="flex gap-2 mt-4">
-                                <button onclick="adjAmali2(-0.5)" class="btn-adj w-10 h-10 rounded-xl bg-red-500/20 text-red-500 border border-red-500/20"><i class="fas fa-minus"></i></button>
-                                <button onclick="adjAmali2(0.5)" class="btn-adj w-10 h-10 rounded-xl bg-green-500/20 text-green-500 border border-green-500/20"><i class="fas fa-plus"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div class="text-center md:text-left">
-                        <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Continuous Assessment</p>
-                        <h2 class="text-5xl font-black text-white italic"><span id="grand-total">49.00</span><span class="text-yellow-500 text-xl ml-2">/100</span></h2>
-                    </div>
-                    <button onclick="saveToCloud()" class="w-full md:w-auto px-10 py-5 bg-yellow-500 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 uppercase tracking-widest hover:-translate-y-1 transition-all active:scale-95">
-                        <i class="fas fa-cloud-upload-alt mr-2"></i> Submit Final Scores
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
-        let amali2_score = 49.00; // Default 70% of 70 marks
+        // MASUKKAN URL API ANDA DI SINI
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxfaG5VInNW0Yu16mqTVI-RcdbTNBEqxelA3TBvcjYDRPh96iYacnOmxolOzbgi3Yu9/exec";
+        
+        let allStudents = [];
+        let currentStudent = null;
 
-        function loadStudent() {
-            const sid = document.getElementById('sel-student').value;
-            const preview = document.getElementById('std-preview');
-            if(sid) {
-                preview.classList.remove('hidden');
-                // Reset to default
-                amali2_score = 49.00;
-                calcAll();
-            } else { preview.classList.add('hidden'); }
+        window.onload = async () => {
+            await refreshData();
+        };
+
+        async function refreshData() {
+            toggleRadar(true);
+            try {
+                const response = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'get_summary' }) 
+                });
+                const res = await response.json();
+                if(res.result === 'success') {
+                    allStudents = res.data.rows; // Andaikan baris 0 adalah header
+                    populateDropdown();
+                    populateKelasFilter();
+                    renderSummary();
+                }
+            } catch (e) {
+                console.error("Gagal memuat data:", e);
+            }
+            toggleRadar(false);
         }
 
-        function adjAmali2(val) {
-            amali2_score = Math.min(70, Math.max(0, amali2_score + val));
-            calcAll();
+        function populateDropdown() {
+            const sel = document.getElementById('sel-student');
+            sel.innerHTML = '<option value="">-- Pilih Pelajar --</option>';
+            // Mula dari i=1 untuk skip header sheet
+            allStudents.slice(1).forEach((row, index) => {
+                sel.innerHTML += `<option value="${index + 1}">${row[2]} (${row[3]})</option>`;
+            });
         }
 
-        function calcAll() {
-            // Get values from sliders
-            const k1 = parseFloat(document.getElementById('k1').value);
-            const k2 = parseFloat(document.getElementById('k2').value);
-            const hp4 = parseFloat(document.getElementById('hp4').value);
-            const hp5 = parseFloat(document.getElementById('hp5').value);
-
-            // Update display values
-            document.getElementById('v-k1').innerText = k1.toFixed(1);
-            document.getElementById('v-k2').innerText = k2.toFixed(1);
-            document.getElementById('v-hp4').innerText = hp4.toFixed(1);
-            document.getElementById('v-hp5').innerText = hp5.toFixed(1);
-            document.getElementById('v-amali2').innerText = amali2_score.toFixed(2);
-
-            // Grand total
-            const total = k1 + k2 + hp4 + hp5 + amali2_score;
-            document.getElementById('grand-total').innerText = total.toFixed(2);
+        function populateKelasFilter() {
+            const filter = document.getElementById('filter-kelas-summary');
+            const kelasSet = new Set();
+            allStudents.slice(1).forEach(row => kelasSet.add(row[3]));
             
-            // Auto Grade
-            const gradeEl = document.getElementById('grand-grade');
-            let grade = "F";
-            if(total >= 80) grade = "A";
-            else if(total >= 65) grade = "B";
-            else if(total >= 50) grade = "C";
-            else if(total >= 40) grade = "D";
-            
-            gradeEl.innerText = grade;
-            gradeEl.className = "text-3xl font-black " + (grade === "A" ? "text-green-400" : grade === "B" ? "text-blue-400" : "text-yellow-500");
+            filter.innerHTML = '<option value="SEMUA">SEMUA KELAS</option>';
+            kelasSet.forEach(k => {
+                if(k) filter.innerHTML += `<option value="${k}">${k}</option>`;
+            });
         }
 
-        function saveToCloud() {
-            document.getElementById('radar-overlay').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('radar-overlay').classList.add('hidden');
-                alert("SUCCESS: Database Synced. Grade " + document.getElementById('grand-grade').innerText + " Recorded.");
-            }, 3000);
+        function loadStudentInfo() {
+            const idx = document.getElementById('sel-student').value;
+            if(!idx) return;
+            currentStudent = allStudents[idx];
+            
+            // Auto-fill markah sedia ada jika ada dalam sheet
+            document.getElementById('k1').value = currentStudent[4] || "";
+            document.getElementById('k2').value = currentStudent[5] || "";
+            document.getElementById('hp4').value = currentStudent[6] || "";
+            document.getElementById('hp5').value = currentStudent[7] || "";
+            document.getElementById('hp3').value = currentStudent[8] || "49"; // Default 70% drpd 70
+            document.getElementById('hp8i').value = currentStudent[9] || "";
+            document.getElementById('hp8k').value = currentStudent[10] || "";
+            document.getElementById('demerit').value = currentStudent[11] || "";
+        }
+
+        function renderSummary() {
+            const filterVal = document.getElementById('filter-kelas-summary').value;
+            let dataFiltered = allStudents.slice(1);
+
+            if(filterVal !== "SEMUA") {
+                dataFiltered = dataFiltered.filter(r => r[3] === filterVal);
+            }
+
+            const counts = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+            dataFiltered.forEach(r => {
+                const gred = r[13]; // Kolum N (Gred)
+                if(counts[gred] !== undefined) counts[gred]++;
+            });
+
+            document.getElementById('count-a').innerText = counts.A;
+
+            const trace = {
+                x: Object.keys(counts),
+                y: Object.values(counts),
+                type: 'bar',
+                marker: { color: '#fbbf24' }
+            };
+
+            const layout = {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#fff', size: 10 },
+                margin: { t: 10, b: 40, l: 30, r: 10 },
+                xaxis: { gridcolor: 'rgba(255,255,255,0.05)' },
+                yaxis: { gridcolor: 'rgba(255,255,255,0.05)' }
+            };
+
+            Plotly.newPlot('grade-chart', [trace], layout, {responsive: true, displayModeBar: false});
+        }
+
+        async function saveMark() {
+            if(!currentStudent) { alert("Sila pilih pelajar terlebih dahulu!"); return; }
+
+            toggleRadar(true);
+            const payload = {
+                action: "save_mark",
+                id_sistem: currentStudent[0],
+                no_kp: currentStudent[1],
+                nama: currentStudent[2],
+                kelas: currentStudent[3],
+                k1: document.getElementById('k1').value,
+                k2: document.getElementById('k2').value,
+                hp4: document.getElementById('hp4').value,
+                hp5: document.getElementById('hp5').value,
+                hp3: document.getElementById('hp3').value,
+                hp8i: document.getElementById('hp8i').value,
+                hp8k: document.getElementById('hp8k').value,
+                demerit: document.getElementById('demerit').value
+            };
+
+            try {
+                const response = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload) 
+                });
+                const res = await response.json();
+                if(res.result === 'success') {
+                    alert("Data Berjaya Disimpan!");
+                    await refreshData(); // Refresh carta & list
+                }
+            } catch (e) {
+                alert("Ralat Cloud: Sila semak sambungan API.");
+            }
+            toggleRadar(false);
+        }
+
+        function resetForm() {
+            const fields = ['k1','k2','hp4','hp5','hp3','hp8i','hp8k','demerit'];
+            fields.forEach(id => document.getElementById(id).value = "");
+            document.getElementById('sel-student').value = "";
+            currentStudent = null;
+        }
+
+        function toggleRadar(show) {
+            document.getElementById('radar-overlay').classList.toggle('hidden', !show);
         }
     </script>
 </body>

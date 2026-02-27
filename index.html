@@ -1,275 +1,123 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-BIG IPGKDA | Admin v50.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { background: radial-gradient(circle at top left, #1e1b4b, #0f172a, #0a0c10); font-family: 'Plus Jakarta Sans', sans-serif; color: #f1f5f9; min-height: 100vh; }
-        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem; }
-        .gold-text { color: #fbbf24; }
-        .input-dark { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 1rem; padding: 1rem; width: 100%; outline: none; }
-        .input-dark:focus { border-color: #fbbf24; }
-        .radar-sweep { animation: spin 2s linear infinite; border-top: 2px solid #6366f1; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-fade { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { background: #020617; color: white; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border-radius: 2rem; border: 1px solid rgba(255,255,255,0.1); }
+        .input-box { background: #0f172a; border: 1px solid #334155; border-radius: 1rem; padding: 1rem; width: 100%; color: white; outline: none; }
+        .avatar-frame { width: 150px; height: 200px; border-radius: 1.5rem; border: 4px solid rgba(251, 191, 36, 0.3); object-fit: cover; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div id="radar-overlay" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex flex-col items-center justify-center backdrop-blur-md">
-        <div class="relative w-48 h-48 border-4 border-indigo-500/10 rounded-full flex items-center justify-center">
-            <div class="absolute inset-0 border-4 border-indigo-500 rounded-full animate-ping opacity-20"></div>
-            <div class="absolute inset-0 rounded-full radar-sweep"></div>
-            <i class="fas fa-satellite-dish text-4xl text-indigo-400"></i>
+    <div id="screen-login" class="max-w-md mx-auto mt-20 glass p-10 text-center">
+        <h1 class="text-3xl font-black text-yellow-500 mb-8 uppercase italic">e-BIG PORTAL</h1>
+        <div class="space-y-4">
+            <input type="text" id="user-id" class="input-box" placeholder="Email / No. IC">
+            <input type="password" id="user-pass" class="input-box" placeholder="Kata Laluan (Pensyarah)">
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="auth('student')" class="bg-blue-600 p-4 rounded-xl font-bold uppercase text-xs">Pelajar</button>
+                <button onclick="auth('lecturer')" class="bg-indigo-600 p-4 rounded-xl font-bold uppercase text-xs">Pensyarah</button>
+            </div>
         </div>
-        <p class="mt-8 gold-text font-black tracking-[0.3em] uppercase animate-pulse">Menyelaras Data Cloud...</p>
     </div>
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div id="screen-student" class="max-w-4xl mx-auto hidden glass p-10 mt-10">
+        <h2 class="text-xl font-black text-yellow-500 mb-8 uppercase">Kemaskini Profil Pelajar</h2>
         
-        <div class="glass-panel p-6 flex justify-between items-center shadow-2xl">
-            <div class="flex items-center gap-4">
-                <div class="bg-yellow-500 p-3 rounded-2xl shadow-lg shadow-yellow-500/40"><i class="fas fa-shield-halved text-black"></i></div>
-                <div>
-                    <h1 class="text-xl font-extrabold gold-text italic uppercase leading-none">Pusat Pemarkahan BIG</h1>
-                    <p class="text-[9px] text-indigo-400 font-bold tracking-widest uppercase mt-1">Sistem Matrix HP MQF 2.0</p>
-                </div>
-            </div>
-            <button onclick="location.reload()" class="bg-red-500/10 text-red-500 border border-red-500/20 px-5 py-2 rounded-xl text-[10px] font-black hover:bg-red-500 hover:text-white transition-all">LOG KELUAR</button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <div class="lg:col-span-8 space-y-6">
-                <div class="glass-panel p-8 shadow-xl">
-                    <div class="flex flex-col md:flex-row gap-4 mb-8">
-                        <div class="flex-1">
-                            <label class="text-[10px] text-gray-500 font-black uppercase ml-1">Cari Nama Pelajar</label>
-                            <select id="sel-student" onchange="loadStudentInfo()" class="input-dark mt-2 font-bold cursor-pointer">
-                                <option value="">-- Pilih Pelajar --</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-6">
-                            <h3 class="text-xs font-black gold-text border-l-4 border-yellow-500 pl-3 uppercase">HPK1 & HPK2 (Kuiz & Sahsiah)</h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="text-[9px] font-bold text-gray-500">KUIZ 1 (5%)</label><input type="number" id="k1" class="input-dark mt-1" step="0.1"></div>
-                                <div><label class="text-[9px] font-bold text-gray-500">KUIZ 2 (5%)</label><input type="number" id="k2" class="input-dark mt-1" step="0.1"></div>
-                                <div><label class="text-[9px] font-bold text-gray-500">HP4 (10%)</label><input type="number" id="hp4" class="input-dark mt-1" step="0.1"></div>
-                                <div><label class="text-[9px] font-bold text-gray-500">HP5 (10%)</label><input type="number" id="hp5" class="input-dark mt-1" step="0.1"></div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                            <h3 class="text-xs font-black text-indigo-400 border-l-4 border-indigo-500 pl-3 uppercase">HPK3 (Amali II - 70%)</h3>
-                            <div class="grid grid-cols-1 gap-4">
-                                <div><label class="text-[9px] font-bold text-gray-500">HP3 - PRAKTIKAL (25%)</label><input type="number" id="hp3" class="input-dark mt-1" placeholder="Mula drpd 49% default"></div>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div><label class="text-[9px] font-bold text-gray-500">HP8 - INDIVIDU</label><input type="number" id="hp8i" class="input-dark mt-1"></div>
-                                    <div><label class="text-[9px] font-bold text-gray-500">HP8 - KUMPULAN</label><input type="number" id="hp8k" class="input-dark mt-1"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-8 p-6 bg-red-500/5 rounded-3xl border border-red-500/10">
-                        <label class="text-[10px] text-red-400 font-black uppercase">Penalti Demerit (Akan mengurangkan jumlah HP)</label>
-                        <input type="number" id="demerit" class="input-dark mt-2 border-red-500/20 text-red-400 font-black" placeholder="0.00">
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                        <button onclick="resetForm()" class="bg-slate-800 hover:bg-slate-700 p-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all">
-                            <i class="fas fa-undo-alt mr-2"></i> Reset Borang
-                        </button>
-                        <button onclick="saveMark()" class="bg-yellow-500 hover:bg-yellow-400 text-black p-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-yellow-500/20 transition-all">
-                            <i class="fas fa-cloud-upload-alt mr-2"></i> Simpan Pemarkahan
-                        </button>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+            <div class="md:col-span-4 flex flex-col items-center space-y-4">
+                <div class="relative group">
+                    <img id="profile-preview" src="https://www.w3schools.com/howto/img_avatar.png" class="avatar-frame shadow-2xl">
+                    <div class="absolute inset-0 bg-black/40 rounded-[1.5rem] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all cursor-pointer">
+                        <i class="fas fa-camera text-2xl"></i>
                     </div>
                 </div>
+                <div class="w-full">
+                    <label class="text-[10px] uppercase font-bold opacity-50 mb-1 block">URL Gambar Profil</label>
+                    <input type="text" id="std-img" class="input-box text-xs" oninput="updatePreview(this.value)" placeholder="Paste Link Foto">
+                </div>
+                <button class="text-[10px] bg-slate-800 px-4 py-2 rounded-lg font-bold uppercase border border-white/10 hover:bg-slate-700">
+                    <i class="fas fa-upload mr-2"></i> Muat Naik Fail
+                </button>
             </div>
 
-            <div class="lg:col-span-4 space-y-6">
-                <div class="glass-panel p-6 shadow-xl">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xs font-black gold-text uppercase italic">Statistik Gred</h3>
-                        <select id="filter-kelas-summary" onchange="renderSummary()" class="bg-slate-950 text-[10px] p-2 rounded-lg border border-white/10 outline-none">
-                            <option value="SEMUA">SEMUA KELAS</option>
+            <div class="md:col-span-8 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] uppercase opacity-50">Siri BIG</label>
+                        <select id="std-siri" class="input-box"><option value="4">SIRI 4</option><option value="2">SIRI 2</option></select>
+                    </div>
+                    <div><label class="text-[10px] uppercase opacity-50">Kumpulan</label>
+                        <select id="std-kump" class="input-box">
+                            <option value="GREY">GREY</option><option value="JINGGA">JINGGA</option>
+                            <option value="KUNING">KUNING</option><option value="UNGU">UNGU</option>
                         </select>
                     </div>
-                    
-                    <div id="grade-chart" class="h-64 w-full"></div>
-
-                    <div id="summary-stat" class="mt-6 space-y-3">
-                        <div class="p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex justify-between items-center">
-                            <span class="text-[10px] font-black text-green-400 uppercase">Jumlah Gred A</span>
-                            <span id="count-a" class="text-2xl font-black text-white">0</span>
-                        </div>
-                        <div id="student-status" class="text-[9px] text-gray-500 font-bold uppercase text-center tracking-widest">
-                            Sistem sedia menerima data
-                        </div>
-                    </div>
                 </div>
+                <input type="text" id="std-alahan" class="input-box" placeholder="Jenis Alahan">
+                <input type="text" id="std-ubat" class="input-box" placeholder="Senarai Ubat Utama">
+                <input type="text" id="std-sos" class="input-box" placeholder="No. Tel Waris / Kecemasan">
+                <button onclick="updateProfile()" class="w-full bg-green-600 p-5 rounded-2xl font-black uppercase shadow-xl hover:bg-green-500 transition-all">
+                    SIMPAN & KEMASKINI PROFIL
+                </button>
             </div>
-
         </div>
     </div>
 
     <script>
-        // MASUKKAN URL API ANDA DI SINI
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxfaG5VInNW0Yu16mqTVI-RcdbTNBEqxelA3TBvcjYDRPh96iYacnOmxolOzbgi3Yu9/exec";
-        
-        let allStudents = [];
-        let currentStudent = null;
+        const API = "https://script.google.com/macros/s/AKfycbxfaG5VInNW0Yu16mqTVI-RcdbTNBEqxelA3TBvcjYDRPh96iYacnOmxolOzbgi3Yu9/exec";
+        let activeUser = null;
 
-        window.onload = async () => {
-            await refreshData();
-        };
-
-        async function refreshData() {
-            toggleRadar(true);
-            try {
-                const response = await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'get_summary' }) 
-                });
-                const res = await response.json();
-                if(res.result === 'success') {
-                    allStudents = res.data.rows; // Andaikan baris 0 adalah header
-                    populateDropdown();
-                    populateKelasFilter();
-                    renderSummary();
-                }
-            } catch (e) {
-                console.error("Gagal memuat data:", e);
-            }
-            toggleRadar(false);
+        function updatePreview(url) {
+            const preview = document.getElementById('profile-preview');
+            preview.src = url || "https://www.w3schools.com/howto/img_avatar.png";
         }
 
-        function populateDropdown() {
-            const sel = document.getElementById('sel-student');
-            sel.innerHTML = '<option value="">-- Pilih Pelajar --</option>';
-            // Mula dari i=1 untuk skip header sheet
-            allStudents.slice(1).forEach((row, index) => {
-                sel.innerHTML += `<option value="${index + 1}">${row[2]} (${row[3]})</option>`;
+        async function auth(type) {
+            const id = document.getElementById('user-id').value;
+            const pw = document.getElementById('user-pass').value;
+            const res = await fetch(API, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: type === 'lecturer' ? 'login_lecturer' : 'login_student', 
+                    email: id, no_kp: id, password: pw 
+                }) 
             });
-        }
-
-        function populateKelasFilter() {
-            const filter = document.getElementById('filter-kelas-summary');
-            const kelasSet = new Set();
-            allStudents.slice(1).forEach(row => kelasSet.add(row[3]));
+            const d = await res.json();
             
-            filter.innerHTML = '<option value="SEMUA">SEMUA KELAS</option>';
-            kelasSet.forEach(k => {
-                if(k) filter.innerHTML += `<option value="${k}">${k}</option>`;
-            });
+            if(d.result === 'success') {
+                document.getElementById('screen-login').classList.add('hidden');
+                if(type === 'student') {
+                    activeUser = d.data.profile;
+                    document.getElementById('screen-student').classList.remove('hidden');
+                    // Isi Data
+                    document.getElementById('std-img').value = activeUser[6] || "";
+                    updatePreview(activeUser[6]);
+                    document.getElementById('std-alahan').value = activeUser[10] || "";
+                    document.getElementById('std-ubat').value = activeUser[11] || "";
+                    document.getElementById('std-sos').value = activeUser[12] || "";
+                } else { alert("Login Pensyarah Berjaya: " + d.data.name); }
+            } else { alert(d.message); }
         }
 
-        function loadStudentInfo() {
-            const idx = document.getElementById('sel-student').value;
-            if(!idx) return;
-            currentStudent = allStudents[idx];
-            
-            // Auto-fill markah sedia ada jika ada dalam sheet
-            document.getElementById('k1').value = currentStudent[4] || "";
-            document.getElementById('k2').value = currentStudent[5] || "";
-            document.getElementById('hp4').value = currentStudent[6] || "";
-            document.getElementById('hp5').value = currentStudent[7] || "";
-            document.getElementById('hp3').value = currentStudent[8] || "49"; // Default 70% drpd 70
-            document.getElementById('hp8i').value = currentStudent[9] || "";
-            document.getElementById('hp8k').value = currentStudent[10] || "";
-            document.getElementById('demerit').value = currentStudent[11] || "";
-        }
-
-        function renderSummary() {
-            const filterVal = document.getElementById('filter-kelas-summary').value;
-            let dataFiltered = allStudents.slice(1);
-
-            if(filterVal !== "SEMUA") {
-                dataFiltered = dataFiltered.filter(r => r[3] === filterVal);
-            }
-
-            const counts = { A: 0, B: 0, C: 0, D: 0, F: 0 };
-            dataFiltered.forEach(r => {
-                const gred = r[13]; // Kolum N (Gred)
-                if(counts[gred] !== undefined) counts[gred]++;
-            });
-
-            document.getElementById('count-a').innerText = counts.A;
-
-            const trace = {
-                x: Object.keys(counts),
-                y: Object.values(counts),
-                type: 'bar',
-                marker: { color: '#fbbf24' }
+        async function updateProfile() {
+            const p = {
+                action: "full_update_student", 
+                no_kp: activeUser[3],
+                url_img: document.getElementById('std-img').value,
+                siri: document.getElementById('std-siri').value,
+                kump: document.getElementById('std-kump').value,
+                no_kump: "1", 
+                alahan: document.getElementById('std-alahan').value,
+                ubat: document.getElementById('std-ubat').value, 
+                sos: document.getElementById('std-sos').value
             };
-
-            const layout = {
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                font: { color: '#fff', size: 10 },
-                margin: { t: 10, b: 40, l: 30, r: 10 },
-                xaxis: { gridcolor: 'rgba(255,255,255,0.05)' },
-                yaxis: { gridcolor: 'rgba(255,255,255,0.05)' }
-            };
-
-            Plotly.newPlot('grade-chart', [trace], layout, {responsive: true, displayModeBar: false});
-        }
-
-        async function saveMark() {
-            if(!currentStudent) { alert("Sila pilih pelajar terlebih dahulu!"); return; }
-
-            toggleRadar(true);
-            const payload = {
-                action: "save_mark",
-                id_sistem: currentStudent[0],
-                no_kp: currentStudent[1],
-                nama: currentStudent[2],
-                kelas: currentStudent[3],
-                k1: document.getElementById('k1').value,
-                k2: document.getElementById('k2').value,
-                hp4: document.getElementById('hp4').value,
-                hp5: document.getElementById('hp5').value,
-                hp3: document.getElementById('hp3').value,
-                hp8i: document.getElementById('hp8i').value,
-                hp8k: document.getElementById('hp8k').value,
-                demerit: document.getElementById('demerit').value
-            };
-
-            try {
-                const response = await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify(payload) 
-                });
-                const res = await response.json();
-                if(res.result === 'success') {
-                    alert("Data Berjaya Disimpan!");
-                    await refreshData(); // Refresh carta & list
-                }
-            } catch (e) {
-                alert("Ralat Cloud: Sila semak sambungan API.");
-            }
-            toggleRadar(false);
-        }
-
-        function resetForm() {
-            const fields = ['k1','k2','hp4','hp5','hp3','hp8i','hp8k','demerit'];
-            fields.forEach(id => document.getElementById(id).value = "");
-            document.getElementById('sel-student').value = "";
-            currentStudent = null;
-        }
-
-        function toggleRadar(show) {
-            document.getElementById('radar-overlay').classList.toggle('hidden', !show);
+            const res = await fetch(API, { method: 'POST', body: JSON.stringify(p) });
+            const d = await res.json();
+            alert(d.message);
         }
     </script>
 </body>

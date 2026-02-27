@@ -16,7 +16,7 @@
 
     <div id="loading" class="fixed inset-0 bg-black/80 z-[100] hidden flex flex-col items-center justify-center">
         <div class="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-yellow-500 font-bold text-xs uppercase tracking-widest">Menyambung Ke Pangkalan Data...</p>
+        <p class="mt-4 text-yellow-500 font-bold text-xs uppercase tracking-widest">Memproses Permintaan...</p>
     </div>
 
     <div id="screen-login" class="max-w-md mx-auto mt-20 glass p-10 text-center">
@@ -63,18 +63,52 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4 flex flex-col items-center space-y-4">
-                <select id="sel-std" onchange="loadStudentMarking()" class="input-box text-xs font-bold uppercase mb-2">
-                    <option value="">-- PILIH PELAJAR --</option>
-                </select>
-                <img id="lec-std-pic" src="https://www.w3schools.com/howto/img_avatar.png" class="img-frame shadow-2xl">
-                <div id="lec-std-info" class="text-center mt-2 hidden">
-                    <p id="info-ic" class="text-xs font-bold text-gray-400"></p>
-                    <p id="info-kump" class="text-[10px] font-black uppercase text-indigo-400 mt-1"></p>
+            
+            <div class="lg:col-span-5 flex flex-col space-y-4">
+                
+                <div class="bg-slate-800/50 p-6 rounded-2xl border border-white/5 shadow-lg">
+                    <h3 class="text-sm font-bold text-yellow-500 uppercase mb-4 border-l-4 border-yellow-500 pl-3">Tapis Pelajar</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold opacity-50 uppercase block mb-1">SIRI BIG</label>
+                            <select id="filter-siri" onchange="filterStudents()" class="input-box text-xs font-bold uppercase">
+                                <option value="ALL">SEMUA SIRI</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold opacity-50 uppercase block mb-1">KELAS</label>
+                                <select id="filter-kelas" onchange="filterStudents()" class="input-box text-xs font-bold uppercase">
+                                    <option value="ALL">SEMUA KELAS</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold opacity-50 uppercase block mb-1">KUMPULAN</label>
+                                <select id="filter-kump" onchange="filterStudents()" class="input-box text-xs font-bold uppercase">
+                                    <option value="ALL">SEMUA KUMPULAN</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-white/10 mt-4">
+                            <label class="text-[10px] font-bold text-yellow-500 uppercase block mb-1">PILIH PELAJAR UNTUK DINILAI</label>
+                            <select id="sel-std" onchange="loadStudentMarking()" class="input-box text-xs font-bold uppercase bg-blue-900/30 border-blue-500/50">
+                                <option value="">-- PILIH PELAJAR --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center mt-4">
+                    <img id="lec-std-pic" src="https://www.w3schools.com/howto/img_avatar.png" class="img-frame shadow-2xl">
+                    <div id="lec-std-info" class="text-center mt-3 hidden">
+                        <p id="info-ic" class="text-xs font-bold text-gray-400"></p>
+                        <p id="info-kump" class="text-[10px] font-black uppercase text-indigo-400 mt-1"></p>
+                    </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-8 space-y-6 hidden" id="marking-panel">
+            <div class="lg:col-span-7 space-y-6 hidden" id="marking-panel">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-slate-900/50 p-4 rounded-xl">
                         <label class="text-[10px] font-bold opacity-50 uppercase">KUIZ 1 (5%)</label>
@@ -135,7 +169,7 @@
     </div>
 
     <script>
-        // MASUKKAN URL BARU DARI LANGKAH 1 (New Deployment)
+        // MASUKKAN URL API TETAP ANDA
         const API_URL = "https://script.google.com/macros/s/AKfycbxfaG5VInNW0Yu16mqTVI-RcdbTNBEqxelA3TBvcjYDRPh96iYacnOmxolOzbgi3Yu9/exec";
         
         let userProfile = null;
@@ -187,12 +221,10 @@
                         document.getElementById('lec-name-disp').innerText = d.data.name;
                         assignedStudents = d.data.students;
                         
-                        const sel = document.getElementById('sel-std');
-                        sel.innerHTML = '<option value="">-- PILIH PELAJAR --</option>';
-                        // Skip header row (index 0) if array contains it
-                        assignedStudents.slice(1).forEach((s, idx) => {
-                            sel.innerHTML += `<option value="${idx}">${s[1]} (${s[3]})</option>`;
-                        });
+                        // Isi data ke dalam Dropdown Filter secara automatik
+                        populateFilters();
+                        // Papar semua pelajar pada mulanya
+                        filterStudents();
                     }
                 } else { alert("RALAT: " + d.message); }
             } catch(e) { 
@@ -201,7 +233,7 @@
             }
         }
 
-        // FUNGSI SIMPAN PELAJAR (TIDAK DIUBAH)
+        // FUNGSI SIMPAN PELAJAR
         async function updateStudent() {
             toggleLoad(true);
             const payload = {
@@ -223,33 +255,95 @@
             } catch(e) { toggleLoad(false); alert("Ralat Simpan Data!"); }
         }
 
-        // FUNGSI JURULATIH: LOAD PELAJAR & SLIDER
+        // FUNGSI ISI DROP DOWN FILTER SECARA AUTOMATIK
+        function populateFilters() {
+            const siris = new Set();
+            const kelas = new Set();
+            const kumps = new Set();
+
+            // Ekstrak data unik dari senarai pelajar
+            assignedStudents.slice(1).forEach(s => {
+                if(s[7]) siris.add(s[7]); // Siri
+                if(s[5]) kelas.add(s[5]); // Kelas
+                if(s[8]) kumps.add(s[8]); // Kumpulan
+            });
+
+            const siriSel = document.getElementById('filter-siri');
+            siriSel.innerHTML = '<option value="ALL">SEMUA SIRI</option>';
+            [...siris].sort().forEach(v => siriSel.innerHTML += `<option value="${v}">${v}</option>`);
+
+            const kelasSel = document.getElementById('filter-kelas');
+            kelasSel.innerHTML = '<option value="ALL">SEMUA KELAS</option>';
+            [...kelas].sort().forEach(v => kelasSel.innerHTML += `<option value="${v}">${v}</option>`);
+
+            const kumpSel = document.getElementById('filter-kump');
+            kumpSel.innerHTML = '<option value="ALL">SEMUA KUMPULAN</option>';
+            [...kumps].sort().forEach(v => kumpSel.innerHTML += `<option value="${v}">${v}</option>`);
+        }
+
+        // FUNGSI TAPIS PELAJAR APABILA DROPDOWN DITUKAR
+        function filterStudents() {
+            const fSiri = document.getElementById('filter-siri').value;
+            const fKelas = document.getElementById('filter-kelas').value;
+            const fKump = document.getElementById('filter-kump').value;
+
+            const sel = document.getElementById('sel-std');
+            sel.innerHTML = '<option value="">-- PILIH PELAJAR --</option>';
+
+            assignedStudents.slice(1).forEach(s => {
+                const matchSiri = (fSiri === 'ALL' || String(s[7]) === String(fSiri));
+                const matchKelas = (fKelas === 'ALL' || String(s[5]) === String(fKelas));
+                const matchKump = (fKump === 'ALL' || String(s[8]) === String(fKump));
+
+                if (matchSiri && matchKelas && matchKump) {
+                    let label = `NO ${s[9]||'-'} | ${s[5]||'-'} | ${s[1]}`;
+                    sel.innerHTML += `<option value="${s[3]}">${label.toUpperCase()}</option>`;
+                }
+            });
+
+            // Sembunyikan borang markah apabila penapis ditukar
+            document.getElementById('marking-panel').classList.add('hidden');
+            document.getElementById('lec-std-info').classList.add('hidden');
+            document.getElementById('lec-std-pic').src = "https://www.w3schools.com/howto/img_avatar.png";
+            selectedStudentIC = null;
+        }
+
+        // FUNGSI JURULATIH LOAD PELAJAR & MARKAH
         function loadStudentMarking() {
-            const idx = document.getElementById('sel-std').value;
-            if(!idx) {
+            const ic = document.getElementById('sel-std').value;
+            if(!ic) {
                 document.getElementById('marking-panel').classList.add('hidden');
                 document.getElementById('lec-std-info').classList.add('hidden');
                 document.getElementById('lec-std-pic').src = "https://www.w3schools.com/howto/img_avatar.png";
+                selectedStudentIC = null;
                 return;
             }
-            const s = assignedStudents[parseInt(idx) + 1]; // +1 because we skipped header in select
-            selectedStudentIC = s[3];
+            
+            const s = assignedStudents.find(student => student[3] === ic);
+            if(!s) return;
+
+            selectedStudentIC = ic; 
             
             document.getElementById('marking-panel').classList.remove('hidden');
             document.getElementById('lec-std-info').classList.remove('hidden');
             document.getElementById('lec-std-pic').src = s[6] || "https://www.w3schools.com/howto/img_avatar.png";
-            document.getElementById('info-ic').innerText = s[3];
-            document.getElementById('info-kump').innerText = "KUMP: " + (s[8] || "-");
+            document.getElementById('info-ic').innerText = "IC: " + s[3];
+            document.getElementById('info-kump').innerText = `SIRI ${s[7]||'-'} | KUMP ${s[8]||'-'} | NO ${s[9]||'-'}`;
 
-            // Load markah sedia ada jika ada (L:11, M:12, N:13, O:14, P:15, Q:16, R:17, S:18, W:22)
             document.getElementById('m-k1').value = s[11] || "";
             document.getElementById('m-k2').value = s[12] || "";
             document.getElementById('m-hp4').value = s[13] || "";
             document.getElementById('m-hp5').value = s[14] || "";
+            document.getElementById('m-hp3-total').innerText = s[15] || "0.0"; 
             document.getElementById('m-hp8i').value = s[16] || "";
             document.getElementById('m-hp8k').value = s[17] || "";
             document.getElementById('m-demerit').value = s[18] || "";
             document.getElementById('m-catatan').value = s[22] || "";
+            
+            for(let i=1; i<=6; i++) {
+                document.getElementById('s'+i).value = 0;
+                document.getElementById('v-s'+i).innerText = "0";
+            }
         }
 
         function calcHP3() {
@@ -262,14 +356,14 @@
             document.getElementById('m-hp3-total').innerText = sum.toFixed(1);
         }
 
-        // FUNGSI JURULATIH: SIMPAN MARKAH
+        // FUNGSI JURULATIH SIMPAN MARKAH
         async function saveMarking() {
-            if(!selectedStudentIC) return alert("Sila pilih pelajar!");
+            if(!selectedStudentIC) return alert("Sila pilih pelajar daripada senarai!");
             toggleLoad(true);
             
             const payload = {
                 action: "save_mark",
-                no_kp: selectedStudentIC,
+                no_kp: selectedStudentIC, 
                 k1: document.getElementById('m-k1').value,
                 k2: document.getElementById('m-k2').value,
                 hp4: document.getElementById('m-hp4').value,
@@ -282,11 +376,16 @@
             };
 
             try {
-                const response = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+                const response = await fetch(API_URL, { 
+                    method: 'POST', 
+                    redirect: 'follow', 
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+                    body: JSON.stringify(payload) 
+                });
                 const d = await response.json();
                 toggleLoad(false);
                 if(d.result === 'success') {
-                    alert(d.message); // Akan papar Gred
+                    alert("TAHNIAH! " + d.message); 
                 } else { alert("RALAT: " + d.message); }
             } catch(e) { toggleLoad(false); alert("Ralat Simpan Markah!"); }
         }

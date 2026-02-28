@@ -7,362 +7,207 @@
         body { background: #020617; color: white; font-family: sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
         .input-box { background: #0f172a; border: 1px solid #334155; border-radius: 1rem; padding: 1rem; width: 100%; color: white; outline: none; transition: 0.3s; }
-        .input-box:focus { border-color: #fbbf24; }
         .img-frame { width: 150px; height: 190px; border: 3px solid #fbbf24; border-radius: 1.5rem; object-fit: cover; background: #1e293b; }
-        input[type=range] { accent-color: #fbbf24; cursor: pointer; }
+        input[type=range] { accent-color: #fbbf24; cursor: pointer; width: 100%; }
+        .score-box { background: rgba(30, 41, 59, 0.8); border: 1px solid #fbbf24; border-radius: 1rem; padding: 1rem; text-align: center; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div id="loading" class="fixed inset-0 bg-black/80 z-[100] hidden flex flex-col items-center justify-center">
         <div class="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-yellow-500 font-bold text-xs uppercase tracking-widest">Memproses Maklumat...</p>
+        <p class="mt-4 text-yellow-500 font-bold text-xs uppercase italic tracking-widest">Sila Tunggu...</p>
     </div>
 
     <div id="screen-login" class="max-w-md mx-auto mt-20 glass p-10 text-center">
-        <h1 class="text-3xl font-black text-yellow-500 mb-8 uppercase italic">e-BIG PORTAL</h1>
+        <h1 class="text-3xl font-black text-yellow-500 mb-8 italic uppercase tracking-tighter">E-BIG PORTAL</h1>
         <div class="space-y-4 text-left">
-            <input type="text" id="user-id" class="input-box" placeholder="IC Pelajar / Email Pensyarah">
-            <input type="password" id="user-pass" class="input-box" placeholder="Password (Pensyarah Sahaja)">
+            <input type="text" id="user-id" class="input-box" placeholder="IC / Email">
+            <input type="password" id="user-pass" class="input-box" placeholder="Password">
             <div class="grid grid-cols-2 gap-3 mt-6">
-                <button onclick="auth('student')" class="bg-blue-600 p-4 rounded-xl font-bold uppercase text-xs shadow-lg hover:bg-blue-500">Log Pelajar</button>
-                <button onclick="auth('lecturer')" class="bg-indigo-600 p-4 rounded-xl font-bold uppercase text-xs shadow-lg hover:bg-indigo-500">Log Pensyarah</button>
+                <button onclick="auth('student')" class="bg-blue-600 p-4 rounded-xl font-bold uppercase text-xs">LOG PELAJAR</button>
+                <button onclick="auth('lecturer')" class="bg-indigo-600 p-4 rounded-xl font-bold uppercase text-xs">LOG PENSYARAH</button>
             </div>
         </div>
     </div>
 
     <div id="screen-student" class="max-w-4xl mx-auto hidden glass p-10 mt-10">
-        <h2 class="text-xl font-black text-yellow-500 mb-8 uppercase border-l-4 border-yellow-500 pl-4">Kemaskini Profil Pelajar</h2>
+        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+            <h2 class="text-xl font-black text-yellow-500 uppercase italic">PROFIL & MARKAH SAYA</h2>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold">KELUAR</button>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div class="md:col-span-4 flex flex-col items-center gap-4">
                 <img id="profile-pic" src="https://www.w3schools.com/howto/img_avatar.png" class="img-frame shadow-2xl">
-                <input type="text" id="std-img-url" class="input-box text-[10px]" oninput="document.getElementById('profile-pic').src=this.value" placeholder="Link Gambar Profil (Drive)">
+                <div class="w-full text-center">
+                    <p class="text-[10px] font-bold opacity-50 mb-2 uppercase">Ganti Gambar Profil</p>
+                    <input type="file" id="fileInput" accept="image/*" class="text-[10px] w-full mb-3">
+                    <button onclick="uploadImage()" class="bg-blue-600 w-full py-2 rounded-lg text-[10px] font-black uppercase">MUAT NAIK GAMBAR</button>
+                </div>
             </div>
-            <div class="md:col-span-8 space-y-4 text-left">
+            <div class="md:col-span-8 space-y-4">
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="score-box"><p class="text-[9px] opacity-60 uppercase font-bold">Jumlah</p><p id="std-total-disp" class="text-2xl font-black text-yellow-500">0.0</p></div>
+                    <div class="score-box"><p class="text-[9px] opacity-60 uppercase font-bold">Gred</p><p id="std-gred-disp" class="text-2xl font-black text-yellow-500">-</p></div>
+                    <div class="score-box"><p class="text-[9px] opacity-60 uppercase font-bold text-red-400">Demerit</p><p id="std-demerit-disp" class="text-2xl font-black text-red-500">0</p></div>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <select id="std-siri" class="input-box text-xs font-bold uppercase"><option value="4">SIRI 4</option><option value="2">SIRI 2</option></select>
-                    <select id="std-kump" class="input-box text-xs font-bold uppercase">
-                        <option value="GREY">GREY</option><option value="JINGGA">JINGGA</option><option value="KUNING">KUNING</option><option value="UNGU">UNGU</option>
-                        <option value="BIRU GELAP">BIRU GELAP</option><option value="BIRU">BIRU</option><option value="PINK">PINK</option><option value="COKLAT">COKLAT</option>
-                        <option value="MERAH">MERAH</option><option value="HIJAU">HIJAU</option>
-                    </select>
+                    <select id="std-kump" class="input-box text-xs font-bold uppercase"><option value="GREY">GREY</option><option value="BIRU">BIRU</option></select>
                 </div>
                 <input type="number" id="std-no" class="input-box" placeholder="No. Dalam Kumpulan">
-                <input type="text" id="std-alahan" class="input-box" placeholder="Jenis Alahan (Jika Tiada Tulis 'Tiada')">
-                <input type="text" id="std-ubat" class="input-box" placeholder="Senarai Ubat (Jika Tiada Tulis 'Tiada')">
-                <input type="text" id="std-sos" class="input-box" placeholder="No. Tel Waris / Kecemasan">
-                <button onclick="updateStudent()" class="w-full bg-green-600 p-5 rounded-2xl font-black uppercase shadow-xl hover:bg-green-500 mt-4">SIMPAN MAKLUMAT</button>
+                <input type="text" id="std-sos" class="input-box" placeholder="No. Tel Waris">
+                <button onclick="updateStudent()" class="w-full bg-green-600 p-5 rounded-2xl font-black uppercase mt-4">SIMPAN PROFIL</button>
             </div>
         </div>
     </div>
 
     <div id="screen-lecturer" class="max-w-6xl mx-auto hidden glass p-10 mt-10">
         <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
-            <h2 class="text-xl font-black text-yellow-500 uppercase">Panel Penilai: <span id="lec-name-disp" class="text-white"></span></h2>
-            <button onclick="location.reload()" class="bg-red-600 px-4 py-2 rounded-xl font-bold text-[10px] uppercase hover:bg-red-500">Log Keluar</button>
+            <h2 class="text-xl font-black text-yellow-500 uppercase italic">PANEL PENILAI: <span id="lec-name-disp"></span></h2>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-2 rounded-xl font-bold text-[10px]">LOG KELUAR</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <div class="lg:col-span-4 flex flex-col space-y-4">
-                <div class="bg-slate-800/50 p-6 rounded-2xl border border-white/5 shadow-lg">
-                    <h3 class="text-sm font-bold text-yellow-500 uppercase mb-4 border-l-4 border-yellow-500 pl-3">Tapis Pelajar</h3>
-                    
+            <div class="lg:col-span-4 space-y-4">
+                <div class="bg-slate-800/50 p-6 rounded-2xl border border-white/5">
+                    <h3 class="text-xs font-bold text-yellow-500 uppercase mb-4 italic">TAPIS PELAJAR</h3>
                     <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-bold opacity-50 uppercase block mb-1">SIRI BIG</label>
-                            <select id="filter-siri" onchange="filterStudents()" class="input-box text-xs font-bold uppercase">
-                                <option value="ALL">SEMUA SIRI</option>
-                            </select>
-                        </div>
+                        <select id="filter-siri" onchange="filterStudents()" class="input-box text-xs font-bold uppercase"></select>
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[10px] font-bold opacity-50 uppercase block mb-1">KELAS</label>
-                                <select id="filter-kelas" onchange="filterStudents()" class="input-box text-xs font-bold uppercase">
-                                    <option value="ALL">SEMUA KELAS</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold opacity-50 uppercase block mb-1">KUMPULAN</label>
-                                <select id="filter-kump" onchange="filterStudents()" class="input-box text-xs font-bold uppercase">
-                                    <option value="ALL">SEMUA KUMPULAN</option>
-                                </select>
-                            </div>
+                            <select id="filter-kelas" onchange="filterStudents()" class="input-box text-xs font-bold uppercase"></select>
+                            <select id="filter-kump" onchange="filterStudents()" class="input-box text-xs font-bold uppercase"></select>
                         </div>
-                        <div class="pt-4 border-t border-white/10 mt-4">
-                            <label class="text-[10px] font-bold text-yellow-500 uppercase block mb-1">PILIH PELAJAR UNTUK DINILAI</label>
-                            <select id="sel-std" onchange="loadStudentMarking()" class="input-box text-xs font-bold uppercase bg-blue-900/50 border-blue-500/50">
-                                <option value="">-- PILIH PELAJAR --</option>
-                            </select>
+                        <div class="pt-4 border-t border-white/10">
+                            <select id="sel-std" onchange="loadStudentMarking()" class="input-box text-xs font-bold uppercase bg-blue-900/50"></select>
                         </div>
                     </div>
                 </div>
-
-                <div class="flex flex-col items-center mt-4">
+                <div class="flex flex-col items-center">
                     <img id="lec-std-pic" src="https://www.w3schools.com/howto/img_avatar.png" class="img-frame shadow-2xl">
                     <div id="lec-std-info" class="text-center mt-3 hidden">
                         <p id="info-nama" class="font-black text-sm text-white uppercase"></p>
-                        <p id="info-ic" class="text-xs font-bold text-gray-400 mt-1"></p>
-                        <p id="info-kump" class="text-[10px] font-black uppercase text-indigo-400 mt-1"></p>
+                        <p id="info-ic" class="text-[10px] font-bold text-gray-400 mt-1"></p>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-8 hidden" id="marking-panel">
                 <div class="bg-slate-900/40 p-6 rounded-3xl border border-white/5 space-y-6">
-                    
-                    <div>
-                        <h3 class="text-xs font-black text-blue-400 uppercase mb-3 border-b border-white/10 pb-2"><i class="fas fa-edit mr-2"></i>Bahagian Kuiz</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-black/30 p-4 rounded-xl">
-                                <label class="text-[10px] font-bold opacity-50 uppercase">KUIZ 1</label>
-                                <input type="number" id="m-k1" class="w-full bg-transparent text-lg font-bold outline-none mt-1 text-yellow-500" placeholder="0">
-                            </div>
-                            <div class="bg-black/30 p-4 rounded-xl">
-                                <label class="text-[10px] font-bold opacity-50 uppercase">KUIZ 2</label>
-                                <input type="number" id="m-k2" class="w-full bg-transparent text-lg font-bold outline-none mt-1 text-yellow-500" placeholder="0">
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-black/30 p-4 rounded-xl"><label class="text-[10px] font-bold opacity-50 uppercase">HP4 Interpersonal (Max 15)</label><input type="number" id="m-hp4" max="15" oninput="if(this.value>15)this.value=15;if(this.value<0)this.value=0;" class="bg-transparent w-full text-lg font-bold outline-none text-yellow-500"></div>
+                        <div class="bg-black/30 p-4 rounded-xl"><label class="text-[10px] font-bold opacity-50 uppercase">HP5 Komunikasi (Max 10)</label><input type="number" id="m-hp5" max="10" oninput="if(this.value>10)this.value=10;if(this.value<0)this.value=0;" class="bg-transparent w-full text-lg font-bold outline-none text-yellow-500"></div>
                     </div>
 
-                    <div>
-                        <h3 class="text-xs font-black text-green-400 uppercase mb-3 border-b border-white/10 pb-2"><i class="fas fa-users mr-2"></i>Bahagian Amali 1</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-black/30 p-4 rounded-xl">
-                                <label class="text-[10px] font-bold opacity-50 uppercase">HP4 Interpersonal</label>
-                                <input type="number" id="m-hp4" class="w-full bg-transparent text-lg font-bold outline-none mt-1 text-yellow-500" placeholder="0">
-                            </div>
-                            <div class="bg-black/30 p-4 rounded-xl">
-                                <label class="text-[10px] font-bold opacity-50 uppercase">HP5 Komunikasi</label>
-                                <input type="number" id="m-hp5" class="w-full bg-transparent text-lg font-bold outline-none mt-1 text-yellow-500" placeholder="0">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-800/80 p-6 rounded-2xl border border-white/10 shadow-inner">
+                    <div class="bg-slate-800/80 p-6 rounded-2xl border border-white/10">
                         <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
-                            <h3 class="text-xs font-black text-purple-400 uppercase"><i class="fas fa-swimmer mr-2"></i>Bahagian Amali 2 (HP3)</h3>
-                            <div class="text-2xl font-black text-yellow-500"><span id="m-hp3-total">0.0</span> <span class="text-sm opacity-50 text-white">/ 25</span></div>
+                            <h3 class="text-xs font-black text-purple-400 uppercase italic">BAHAGIAN AMALI 2 (HP3)</h3>
+                            <div class="text-2xl font-black text-yellow-500"><span id="m-hp3-total">0.0</span> / 25</div>
                         </div>
-                        <div class="space-y-3">
-                            <div><div class="flex justify-between text-[10px] font-bold mb-1"><span>Kecergasan (Max 3)</span><span id="v-s1" class="text-yellow-500">0</span></div><input type="range" id="s1" min="0" max="3" step="0.1" value="0" oninput="calcHP3()" class="w-full"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold mb-1"><span>Pemakanan (Max 4)</span><span id="v-s2" class="text-yellow-500">0</span></div><input type="range" id="s2" min="0" max="4" step="0.1" value="0" oninput="calcHP3()" class="w-full"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold mb-1"><span>Kembara (Max 4)</span><span id="v-s3" class="text-yellow-500">0</span></div><input type="range" id="s3" min="0" max="4" step="0.1" value="0" oninput="calcHP3()" class="w-full"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold mb-1"><span>Keyakinan Air (Max 2)</span><span id="v-s4" class="text-yellow-500">0</span></div><input type="range" id="s4" min="0" max="2" step="0.1" value="0" oninput="calcHP3()" class="w-full"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold mb-1"><span>Rakit/Kayak (Max 6)</span><span id="v-s5" class="text-yellow-500">0</span></div><input type="range" id="s5" min="0" max="6" step="0.1" value="0" oninput="calcHP3()" class="w-full"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold mb-1"><span>Tali Tinggi (Max 6)</span><span id="v-s6" class="text-yellow-500">0</span></div><input type="range" id="s6" min="0" max="6" step="0.1" value="0" oninput="calcHP3()" class="w-full"></div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-xs font-black text-orange-400 uppercase mb-3 border-b border-white/10 pb-2"><i class="fas fa-file-alt mr-2"></i>Tugasan & Disiplin</h3>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="bg-black/30 p-4 rounded-xl">
-                                <label class="text-[10px] font-bold opacity-50 uppercase">HP8 Individu</label>
-                                <input type="number" id="m-hp8i" class="w-full bg-transparent text-lg font-bold outline-none mt-1 text-yellow-500" placeholder="0">
-                            </div>
-                            <div class="bg-black/30 p-4 rounded-xl">
-                                <label class="text-[10px] font-bold opacity-50 uppercase">HP8 Kumpulan</label>
-                                <input type="number" id="m-hp8k" class="w-full bg-transparent text-lg font-bold outline-none mt-1 text-yellow-500" placeholder="0">
-                            </div>
-                            <div class="bg-red-500/10 p-4 rounded-xl border border-red-500/30">
-                                <label class="text-[10px] font-bold text-red-500 uppercase">Demerit</label>
-                                <input type="number" id="m-demerit" class="w-full bg-transparent text-lg font-bold outline-none text-red-500 mt-1" placeholder="0">
-                            </div>
+                        <div class="space-y-4">
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kecergasan (Max 3)</span><span id="v-s1" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s1" min="0" max="3" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Pemakanan (Max 4)</span><span id="v-s2" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s2" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kembara (Max 4)</span><span id="v-s3" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s3" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Keyakinan Air (Max 2)</span><span id="v-s4" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s4" min="0" max="2" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Rakit/Kayak (Max 6)</span><span id="v-s5" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s5" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Tali Tinggi (Max 6)</span><span id="v-s6" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s6" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
                         </div>
                     </div>
 
-                    <div class="bg-black/30 p-4 rounded-xl">
-                        <label class="text-[10px] font-bold opacity-50 uppercase">Catatan Prestasi Pelajar</label>
-                        <input type="text" id="m-catatan" class="w-full bg-transparent text-sm font-bold outline-none mt-1" placeholder="Masukkan komen atau nota prestasi...">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-black/30 p-4 rounded-xl">
+                            <label class="text-[9px] opacity-50 uppercase font-bold">HP8 Individu (Max 20)</label>
+                            <input type="number" id="m-hp8i" max="20" oninput="if(this.value>20)this.value=20;if(this.value<0)this.value=0;" class="bg-transparent w-full font-bold text-yellow-500 outline-none">
+                        </div>
+                        <div class="bg-black/30 p-4 rounded-xl">
+                            <label class="text-[9px] opacity-50 uppercase font-bold">HP8 Kumpulan (Max 30)</label>
+                            <input type="number" id="m-hp8k" max="30" oninput="if(this.value>30)this.value=30;if(this.value<0)this.value=0;" class="bg-transparent w-full font-bold text-yellow-500 outline-none">
+                        </div>
+                        <div class="bg-green-500/10 p-4 rounded-xl border border-green-500/30"><label class="text-[9px] text-green-500 uppercase font-bold">Merit (+)</label><input type="number" id="m-merit" class="bg-transparent w-full font-bold text-green-500 outline-none" value="0"></div>
+                        <div class="bg-red-500/10 p-4 rounded-xl border border-red-500/30"><label class="text-[9px] text-red-500 uppercase font-bold">Demerit (-)</label><input type="number" id="m-demerit" class="bg-transparent w-full font-bold text-red-500 outline-none" value="0"></div>
                     </div>
 
-                    <button onclick="saveMarking()" class="w-full bg-yellow-500 text-black p-5 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:bg-yellow-400 transition-all mt-6"><i class="fas fa-save mr-2"></i> Sahkan & Simpan Markah</button>
+                    <button onclick="saveMarking()" class="w-full bg-yellow-500 text-black p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400 shadow-xl transition-all">SAHKAN & SIMPAN MARKAH</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // URL TETAP API ANDA
         const API_URL = "https://script.google.com/macros/s/AKfycbxfaG5VInNW0Yu16mqTVI-RcdbTNBEqxelA3TBvcjYDRPh96iYacnOmxolOzbgi3Yu9/exec";
-        
-        let userProfile = null;
-        let assignedStudents = [];
-        let selectedStudentIC = null;
+        let userProfile = null, assignedStudents = [], selectedStudentIC = null;
 
-        function toggleLoad(show) { document.getElementById('loading').classList.toggle('hidden', !show); }
+        function toggleLoad(s) { document.getElementById('loading').classList.toggle('hidden', !s); }
 
         async function auth(type) {
             const id = document.getElementById('user-id').value;
             const pw = document.getElementById('user-pass').value;
-            if(!id) return alert("Sila masukkan IC atau Email anda!");
-            
             toggleLoad(true);
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    redirect: 'follow', 
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: type === 'lecturer' ? 'login_lecturer' : 'login_student', email: id, no_kp: id, password: pw })
-                });
-                
-                const d = await response.json();
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: type === 'lecturer' ? 'login_lecturer' : 'login_student', email: id, no_kp: id, password: pw }) });
+                const d = await res.json();
                 toggleLoad(false);
-
                 if(d.result === 'success') {
                     document.getElementById('screen-login').classList.add('hidden');
-                    
                     if(type === 'student') {
                         userProfile = d.data.profile;
                         document.getElementById('screen-student').classList.remove('hidden');
-                        
                         document.getElementById('profile-pic').src = userProfile[6] || "https://www.w3schools.com/howto/img_avatar.png";
-                        document.getElementById('std-img-url').value = userProfile[6] || "";
-                        document.getElementById('std-siri').value = userProfile[7] || "4";
-                        document.getElementById('std-kump').value = userProfile[8] || "GREY";
-                        document.getElementById('std-no').value = userProfile[9] || "";
-                        document.getElementById('std-alahan').value = userProfile[10] || "";
-                        document.getElementById('std-ubat').value = userProfile[11] || "";
-                        document.getElementById('std-sos').value = userProfile[12] || "";
-                        
-                        alert("Selamat Datang, " + userProfile[1] + "!");
-                    } else { 
-                        // PAPARAN PENSYARAH
+                    } else {
                         document.getElementById('screen-lecturer').classList.remove('hidden');
                         document.getElementById('lec-name-disp').innerText = d.data.name;
                         assignedStudents = d.data.students;
-                        
                         populateFilters();
-                        filterStudents();
                     }
-                } else { alert("RALAT: " + d.message); }
-            } catch(e) { 
-                toggleLoad(false);
-                alert("Gagal menghubungi pangkalan data."); 
-            }
-        }
-
-        async function updateStudent() {
-            toggleLoad(true);
-            const payload = {
-                action: "full_update_student", 
-                no_kp: userProfile[3], 
-                url_img: document.getElementById('std-img-url').value,
-                siri: document.getElementById('std-siri').value,
-                kump: document.getElementById('std-kump').value,
-                no_kump: document.getElementById('std-no').value,
-                alahan: document.getElementById('std-alahan').value,
-                ubat: document.getElementById('std-ubat').value,
-                sos: document.getElementById('std-sos').value
-            };
-            try {
-                const response = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
-                const d = await response.json();
-                toggleLoad(false);
-                alert(d.message);
-            } catch(e) { toggleLoad(false); alert("Ralat Simpan Data!"); }
+                } else alert(d.message);
+            } catch(e) { toggleLoad(false); alert("Ralat Rangkaian!"); }
         }
 
         function populateFilters() {
-            const siris = new Set();
-            const kelas = new Set();
-            const kumps = new Set();
-
-            assignedStudents.slice(1).forEach(s => {
-                if(s[7]) siris.add(String(s[7]).trim());
-                if(s[5]) kelas.add(String(s[5]).trim());
+            const siris = new Set(), kelas = new Set(), kumps = new Set();
+            assignedStudents.slice(1).forEach(s => { 
+                if(s[7]) siris.add(String(s[7]).trim()); 
+                if(s[5]) kelas.add(String(s[5]).trim()); 
                 if(s[8]) kumps.add(String(s[8]).trim());
             });
-
-            const siriSel = document.getElementById('filter-siri');
-            siriSel.innerHTML = '<option value="ALL">SEMUA SIRI</option>';
-            [...siris].sort().forEach(v => siriSel.innerHTML += `<option value="${v}">${v}</option>`);
-
-            const kelasSel = document.getElementById('filter-kelas');
-            kelasSel.innerHTML = '<option value="ALL">SEMUA KELAS</option>';
-            [...kelas].sort().forEach(v => kelasSel.innerHTML += `<option value="${v}">${v}</option>`);
-
-            const kumpSel = document.getElementById('filter-kump');
-            kumpSel.innerHTML = '<option value="ALL">SEMUA KUMPULAN</option>';
-            [...kumps].sort().forEach(v => kumpSel.innerHTML += `<option value="${v}">${v}</option>`);
+            const fill = (id, set, label) => {
+                const el = document.getElementById(id);
+                el.innerHTML = `<option value="ALL">SEMUA ${label}</option>`;
+                [...set].sort().forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
+            };
+            fill('filter-siri', siris, 'SIRI'); fill('filter-kelas', kelas, 'KELAS'); fill('filter-kump', kumps, 'KUMPULAN');
+            filterStudents();
         }
 
         function filterStudents() {
-            const fSiri = document.getElementById('filter-siri').value;
-            const fKelas = document.getElementById('filter-kelas').value;
-            const fKump = document.getElementById('filter-kump').value;
-
+            const fs = document.getElementById('filter-siri').value;
+            const fk = document.getElementById('filter-kelas').value;
+            const fg = document.getElementById('filter-kump').value;
             const sel = document.getElementById('sel-std');
             sel.innerHTML = '<option value="">-- PILIH PELAJAR --</option>';
-
             assignedStudents.slice(1).forEach(s => {
-                const matchSiri = (fSiri === 'ALL' || String(s[7]).trim() === String(fSiri));
-                const matchKelas = (fKelas === 'ALL' || String(s[5]).trim() === String(fKelas));
-                const matchKump = (fKump === 'ALL' || String(s[8]).trim() === String(fKump));
-
-                if (matchSiri && matchKelas && matchKump) {
-                    let label = `NO ${s[9]||'-'} | ${s[5]||'-'} | ${s[1]}`;
-                    // PENGGUNAAN IC SEBAGAI VALUE (DIPAKSA MENJADI STRING)
-                    sel.innerHTML += `<option value="${String(s[3]).trim()}">${label.toUpperCase()}</option>`;
-                }
+                if((fs==='ALL'||String(s[7]).trim()===fs) && (fk==='ALL'||String(s[5]).trim()===fk) && (fg==='ALL'||String(s[8]).trim()===fg))
+                    sel.innerHTML += `<option value="${String(s[3]).trim()}">${s[1].toUpperCase()}</option>`;
             });
-
-            document.getElementById('marking-panel').classList.add('hidden');
-            document.getElementById('lec-std-info').classList.add('hidden');
-            document.getElementById('lec-std-pic').src = "https://www.w3schools.com/howto/img_avatar.png";
-            selectedStudentIC = null;
         }
 
-        // PEMBETULAN UTAMA: CARI PELAJAR MENGGUNAKAN STRING IC
         function loadStudentMarking() {
             const ic = document.getElementById('sel-std').value;
-            
-            if(!ic) {
-                document.getElementById('marking-panel').classList.add('hidden');
-                document.getElementById('lec-std-info').classList.add('hidden');
-                document.getElementById('lec-std-pic').src = "https://www.w3schools.com/howto/img_avatar.png";
-                selectedStudentIC = null;
-                return;
-            }
-            
-            // PAKSA SEMUA MENJADI STRING SEMASA PENCARIAN
-            const s = assignedStudents.find(student => String(student[3]).trim() === String(ic).trim());
-            
-            if(!s) {
-                alert("Ralat memuatkan data pelajar.");
-                return;
-            }
-
-            selectedStudentIC = String(s[3]).trim(); 
-            
+            // PEMBETULAN IC STRING MATCHING (Mencegah Mismatch Gambar)
+            const s = assignedStudents.find(st => String(st[3]).trim() === String(ic).trim());
+            if(!s) return;
+            selectedStudentIC = String(s[3]).trim();
             document.getElementById('marking-panel').classList.remove('hidden');
             document.getElementById('lec-std-info').classList.remove('hidden');
             document.getElementById('lec-std-pic').src = s[6] || "https://www.w3schools.com/howto/img_avatar.png";
             document.getElementById('info-nama').innerText = s[1];
             document.getElementById('info-ic').innerText = "IC: " + s[3];
-            document.getElementById('info-kump').innerText = `SIRI ${s[7]||'-'} | KUMP ${s[8]||'-'} | NO ${s[9]||'-'} | ${s[5]||'-'}`;
-
-            document.getElementById('m-k1').value = s[11] || "";
-            document.getElementById('m-k2').value = s[12] || "";
-            document.getElementById('m-hp4').value = s[13] || "";
-            document.getElementById('m-hp5').value = s[14] || "";
-            document.getElementById('m-hp3-total').innerText = s[15] || "0.0"; 
-            document.getElementById('m-hp8i').value = s[16] || "";
-            document.getElementById('m-hp8k').value = s[17] || "";
-            document.getElementById('m-demerit').value = s[18] || "";
-            document.getElementById('m-catatan').value = s[22] || "";
-            
-            for(let i=1; i<=6; i++) {
-                document.getElementById('s'+i).value = 0;
-                document.getElementById('v-s'+i).innerText = "0";
-            }
         }
 
         function calcHP3() {
             let sum = 0;
             for(let i=1; i<=6; i++) {
-                let v = parseFloat(document.getElementById('s'+i).value);
+                let v = parseFloat(document.getElementById('s'+i).value) || 0;
                 document.getElementById('v-s'+i).innerText = v.toFixed(1);
                 sum += v;
             }
@@ -370,36 +215,30 @@
         }
 
         async function saveMarking() {
-            if(!selectedStudentIC) return alert("Sila pilih pelajar daripada senarai!");
             toggleLoad(true);
-            
             const payload = {
-                action: "save_mark",
-                no_kp: selectedStudentIC, 
-                k1: document.getElementById('m-k1').value,
-                k2: document.getElementById('m-k2').value,
-                hp4: document.getElementById('m-hp4').value,
-                hp5: document.getElementById('m-hp5').value,
-                hp3: document.getElementById('m-hp3-total').innerText,
-                hp8i: document.getElementById('m-hp8i').value,
-                hp8k: document.getElementById('m-hp8k').value,
-                demerit: document.getElementById('m-demerit').value,
-                catatan: document.getElementById('m-catatan').value
+                action: "save_mark", no_kp: selectedStudentIC,
+                hp4: document.getElementById('m-hp4').value, hp5: document.getElementById('m-hp5').value,
+                hp3: document.getElementById('m-hp3-total').innerText, 
+                hp8i: document.getElementById('m-hp8i').value, hp8k: document.getElementById('m-hp8k').value,
+                merit: document.getElementById('m-merit').value, demerit: document.getElementById('m-demerit').value
             };
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const d = await res.json(); toggleLoad(false); alert(d.message);
+        }
 
-            try {
-                const response = await fetch(API_URL, { 
-                    method: 'POST', 
-                    redirect: 'follow', 
-                    headers: { "Content-Type": "text/plain;charset=utf-8" }, 
-                    body: JSON.stringify(payload) 
-                });
-                const d = await response.json();
-                toggleLoad(false);
-                if(d.result === 'success') {
-                    alert("TAHNIAH! " + d.message); 
-                } else { alert("RALAT: " + d.message); }
-            } catch(e) { toggleLoad(false); alert("Ralat Simpan Markah!"); }
+        function uploadImage() {
+            const f = document.getElementById('fileInput');
+            if(f.files.length === 0) return alert("Pilih gambar!");
+            toggleLoad(true);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const b64 = e.target.result.split(',')[1];
+                google.script.run.withSuccessHandler(url => {
+                    toggleLoad(false); document.getElementById('profile-pic').src = url; alert("Gambar Berjaya Dikemaskini!");
+                }).uploadFileToDrive(b64, f.files[0].name, f.files[0].type, userProfile[3]);
+            };
+            reader.readAsDataURL(f.files[0]);
         }
     </script>
 </body>

@@ -7,17 +7,17 @@
     <style>
         body { background: #020617; color: white; font-family: sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
-        .input-box { background: #0f172a; border: 1px solid #334155; border-radius: 1rem; padding: 1rem; width: 100%; color: white; outline: none; transition: 0.3s; }
+        .input-box { background: #0f172a; border: 1px solid #334155; border-radius: 1rem; padding: 1rem; width: 100%; color: white; outline: none; }
         .img-frame { width: 150px; height: 190px; border: 3px solid #fbbf24; border-radius: 1.5rem; object-fit: cover; background: #1e293b; }
-        .score-box { background: rgba(30, 41, 59, 0.8); border: 1px solid #fbbf24; border-radius: 1rem; padding: 1rem; text-align: center; }
         input[type=range] { accent-color: #fbbf24; cursor: pointer; width: 100%; }
+        .score-box { background: rgba(30, 41, 59, 0.8); border: 1px solid #fbbf24; border-radius: 1rem; padding: 1rem; text-align: center; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div id="loading" class="fixed inset-0 bg-black/80 z-[100] hidden flex flex-col items-center justify-center">
         <div class="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-yellow-500 font-bold text-xs uppercase italic tracking-widest text-center">Memproses Data...</p>
+        <p class="mt-4 text-yellow-500 font-bold text-xs uppercase italic tracking-widest text-center">Menghubungi Pangkalan Data...</p>
     </div>
 
     <div id="screen-login" class="max-w-md mx-auto mt-20 glass p-10 text-center">
@@ -34,29 +34,24 @@
 
     <div id="screen-student" class="max-w-4xl mx-auto hidden glass p-10 mt-10">
         <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
-            <h2 class="text-xl font-black text-yellow-500 uppercase italic">PROFIL BIODATA PELAJAR</h2>
-            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold">KELUAR</button>
+            <h2 class="text-xl font-black text-yellow-500 uppercase italic">PROFIL BIODATA SAYA</h2>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold">LOG KELUAR</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div class="md:col-span-4 flex flex-col items-center gap-4">
                 <img id="profile-pic" src="https://www.w3schools.com/howto/img_avatar.png" class="img-frame shadow-2xl">
                 <div class="w-full text-center">
                     <input type="file" id="fileInput" accept="image/*" class="text-[10px] mb-2 block w-full">
-                    <button onclick="uploadImage()" class="w-full bg-blue-500 py-2 rounded-lg text-[10px] font-bold uppercase">MUAT NAIK GAMBAR</button>
+                    <button onclick="uploadImage()" class="w-full bg-blue-500 py-2 rounded-lg text-[10px] font-bold uppercase">KEMASKINI GAMBAR</button>
                 </div>
             </div>
             <div class="md:col-span-8 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="std-siri" class="input-box text-xs font-bold uppercase">
-                        <option value="4">SIRI 4</option><option value="2">SIRI 2</option><option value="1">SIRI 1</option>
-                    </select>
-                    <select id="std-kump" class="input-box text-xs font-bold uppercase">
-                        <option value="GREY">GREY</option><option value="BIRU">BIRU</option><option value="HIJAU">HIJAU</option>
-                        <option value="MERAH">MERAH</option><option value="KUNING">KUNING</option><option value="UNGU">UNGU</option>
-                    </select>
+                    <select id="std-siri" class="input-box text-xs font-bold uppercase"><option value="4">SIRI 4</option><option value="2">SIRI 2</option><option value="1">SIRI 1</option></select>
+                    <select id="std-kump" class="input-box text-xs font-bold uppercase"><option value="GREY">GREY</option><option value="BIRU">BIRU</option><option value="HIJAU">HIJAU</option><option value="MERAH">MERAH</option></select>
                 </div>
                 <input type="number" id="std-no" class="input-box" placeholder="No. Dalam Kumpulan">
-                <input type="text" id="std-alahan" class="input-box" placeholder="Jenis Alahan / Perubatan">
+                <input type="text" id="std-alahan" class="input-box" placeholder="Jenis Alahan / Ubat">
                 <input type="text" id="std-sos" class="input-box" placeholder="No. Tel Waris / Kecemasan">
                 <button onclick="updateStudent()" class="w-full bg-green-600 p-4 rounded-xl font-black uppercase shadow-lg">SIMPAN PROFIL BIODATA</button>
             </div>
@@ -65,8 +60,8 @@
 
     <div id="screen-lecturer" class="max-w-6xl mx-auto hidden glass p-10 mt-10">
         <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
-            <h2 class="text-xl font-black text-yellow-500 uppercase italic italic">PANEL PENILAI: <span id="lec-name-disp"></span></h2>
-            <button onclick="location.reload()" class="bg-red-600 px-4 py-2 rounded-xl font-bold text-[10px]">KELUAR</button>
+            <h2 class="text-xl font-black text-yellow-500 uppercase italic">PANEL PENILAI: <span id="lec-name-disp"></span></h2>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-2 rounded-xl font-bold text-[10px]">LOG KELUAR</button>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 space-y-4">
@@ -74,9 +69,8 @@
                     <h3 class="text-[10px] font-bold text-yellow-500 uppercase mb-4 italic">TAPIS PELAJAR</h3>
                     <select id="filter-siri" onchange="filterStudents()" class="input-box text-xs mb-2 uppercase"></select>
                     <select id="filter-kelas" onchange="filterStudents()" class="input-box text-xs mb-2 uppercase"></select>
-                    <select id="filter-kump" onchange="filterStudents()" class="input-box text-xs mb-2 uppercase"></select>
-                    <div class="pt-4 border-t border-white/10">
-                        <label class="text-[10px] font-bold opacity-50 mb-1 block uppercase">PILIH PELAJAR (SUSUNAN NO. KUMP)</label>
+                    <div class="pt-4 border-t border-white/10 mt-2">
+                        <label class="text-[10px] font-bold opacity-50 mb-1 block uppercase">Senarai Pelajar (Susunan No. Kump)</label>
                         <select id="sel-std" onchange="loadStudentMarking()" class="input-box text-xs bg-blue-900/50 uppercase"></select>
                     </div>
                 </div>
@@ -93,23 +87,26 @@
                         <div class="bg-black/30 p-4 rounded-xl"><label class="text-[10px] font-bold opacity-50 uppercase">HP5 (Max 10)</label><input type="number" id="m-hp5" max="10" oninput="if(this.value>10)this.value=10" class="bg-transparent w-full text-lg font-bold outline-none text-yellow-500"></div>
                     </div>
                     <div class="bg-slate-800/80 p-6 rounded-2xl border border-white/10 shadow-inner">
-                        <div class="flex justify-between items-center mb-4"><h3 class="text-xs font-black text-purple-400 uppercase italic">BAHAGIAN AMALI 2 (HP3)</h3><div class="text-xl font-black text-yellow-500"><span id="m-hp3-total">0.0</span> / 25</div></div>
+                        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+                            <h3 class="text-xs font-black text-purple-400 uppercase italic">BAHAGIAN AMALI 2 (HP3)</h3>
+                            <div class="text-xl font-black text-yellow-500"><span id="m-hp3-total">0.0</span> / 25</div>
+                        </div>
                         <div class="space-y-3">
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kecergasan (Max 3)</span><span id="v-s1" class="text-yellow-500">0</span></div><input type="range" id="s1" min="0" max="3" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Pemakanan (Max 4)</span><span id="v-s2" class="text-yellow-500">0</span></div><input type="range" id="s2" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kembara (Max 4)</span><span id="v-s3" class="text-yellow-500">0</span></div><input type="range" id="s3" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Keyakinan Air (Max 2)</span><span id="v-s4" class="text-yellow-500">0</span></div><input type="range" id="s4" min="0" max="2" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Rakit/Kayak (Max 6)</span><span id="v-s5" class="text-yellow-500">0</span></div><input type="range" id="s5" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Tali Tinggi (Max 6)</span><span id="v-s6" class="text-yellow-500">0</span></div><input type="range" id="s6" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kecergasan (Max 3)</span><span id="v-s1" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s1" min="0" max="3" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Pemakanan (Max 4)</span><span id="v-s2" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s2" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kembara (Max 4)</span><span id="v-s3" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s3" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Keyakinan Air (Max 2)</span><span id="v-s4" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s4" min="0" max="2" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Rakit/Kayak (Max 6)</span><span id="v-s5" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s5" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Tali Tinggi (Max 6)</span><span id="v-s6" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s6" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] opacity-50 uppercase font-bold">HP8 Individu (Max 20)</label><input type="number" id="m-hp8i" max="20" oninput="if(this.value>20)this.value=20" class="bg-transparent w-full font-bold text-yellow-500 outline-none"></div>
-                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] opacity-50 uppercase font-bold">HP8 Kump (Max 30)</label><input type="number" id="m-hp8k" max="30" oninput="if(this.value>30)this.value=30" class="bg-transparent w-full font-bold text-yellow-500 outline-none"></div>
+                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] font-bold opacity-50 uppercase">HP8 Indv (Max 20)</label><input type="number" id="m-hp8i" max="20" oninput="if(this.value>20)this.value=20" class="bg-transparent w-full font-bold text-yellow-500 outline-none"></div>
+                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] font-bold opacity-50 uppercase">HP8 Kump (Max 30)</label><input type="number" id="m-hp8k" max="30" oninput="if(this.value>30)this.value=30" class="bg-transparent w-full font-bold text-yellow-500 outline-none"></div>
                         <div class="bg-green-600/20 p-3 rounded-xl border border-green-500/30"><label class="text-[9px] text-green-500 font-bold uppercase">Merit (+)</label><input type="number" id="m-merit" class="bg-transparent w-full font-bold text-green-500 outline-none" value="0"></div>
                         <div class="bg-red-600/20 p-3 rounded-xl border border-red-500/30"><label class="text-[9px] text-red-400 font-bold uppercase">Demerit (-)</label><input type="number" id="m-demerit" class="bg-transparent w-full font-bold text-red-500 outline-none" value="0"></div>
                     </div>
-                    <button onclick="saveMarking()" class="w-full bg-yellow-500 text-black p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400">SAHKAN & SIMPAN MARKAH</button>
+                    <button onclick="saveMarking()" class="w-full bg-yellow-500 text-black p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400 shadow-xl transition-all">SAHKAN & SIMPAN MARKAH</button>
                 </div>
             </div>
         </div>
@@ -117,14 +114,14 @@
 
     <div id="screen-admin" class="max-w-6xl mx-auto hidden glass p-10 mt-10">
         <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
-            <h2 class="text-xl font-black text-yellow-500 uppercase italic">Admin: En. Haniff Faizal</h2>
-            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold">KELUAR</button>
+            <h2 class="text-xl font-black text-yellow-500 uppercase italic">Admin Dashboard: En. Haniff Faizal</h2>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold">LOG KELUAR</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 text-center text-white">
-            <div class="score-box"><p class="text-xs opacity-60 uppercase font-bold">Min</p><p id="adm-mean" class="text-3xl font-black text-green-500">0.0</p></div>
-            <div class="score-box"><p class="text-xs opacity-60 uppercase font-bold">Median</p><p id="adm-median" class="text-3xl font-black text-blue-500">0.0</p></div>
-            <div class="score-box"><p class="text-xs opacity-60 uppercase font-bold">Mod</p><p id="adm-mode" class="text-3xl font-black text-purple-500">0.0</p></div>
-            <div class="score-box"><p class="text-xs opacity-60 uppercase font-bold">Bil Pelajar</p><p id="adm-count" class="text-3xl font-black text-yellow-500">0</p></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 text-center">
+            <div class="score-box"><p class="text-xs opacity-60">MIN</p><p id="adm-mean" class="text-3xl font-black text-green-500">0.0</p></div>
+            <div class="score-box"><p class="text-xs opacity-60">MEDIAN</p><p id="adm-median" class="text-3xl font-black text-blue-500">0.0</p></div>
+            <div class="score-box"><p class="text-xs opacity-60">MOD</p><p id="adm-mode" class="text-3xl font-black text-purple-500">0.0</p></div>
+            <div class="score-box"><p class="text-xs opacity-60">PELAJAR</p><p id="adm-count" class="text-3xl font-black text-yellow-500">0</p></div>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="bg-white/5 p-6 rounded-3xl border border-white/10"><canvas id="gradeChart"></canvas></div>
@@ -158,7 +155,7 @@
                         document.getElementById('std-kump').value = userProfile[8] || "GREY";
                         document.getElementById('std-no').value = userProfile[9] || "";
                         document.getElementById('std-alahan').value = userProfile[10] || "";
-                        document.getElementById('std-sos').value = userProfile[12] || "";
+                        document.getElementById('std-sos.value') = userProfile[12] || "";
                     } else {
                         document.getElementById('screen-lecturer').classList.remove('hidden');
                         document.getElementById('lec-name-disp').innerText = d.data.name;
@@ -170,50 +167,46 @@
         }
 
         function populateFilters() {
-            const siri = new Set(), kelas = new Set(), kump = new Set();
+            const siri = new Set(), kelas = new Set();
             assignedStudents.slice(1).forEach(s => { 
-                if(s[7]) siri.add(String(s[7])); if(s[5]) kelas.add(String(s[5])); if(s[8]) kump.add(String(s[8]));
+                if(s[7]) siri.add(String(s[7])); if(s[2]) kelas.add(String(s[2]));
             });
             const fill = (id, set, lbl) => {
                 const el = document.getElementById(id);
                 el.innerHTML = `<option value="ALL">SEMUA ${lbl}</option>`;
                 [...set].sort().forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
             };
-            fill('filter-siri', siri, 'SIRI'); fill('filter-kelas', kelas, 'KELAS'); fill('filter-kump', kump, 'KUMPULAN');
+            fill('filter-siri', siri, 'SIRI'); fill('filter-kelas', kelas, 'KELAS');
             filterStudents();
         }
 
         function filterStudents() {
-            const fs = document.getElementById('filter-siri').value, fk = document.getElementById('filter-kelas').value, fg = document.getElementById('filter-kump').value;
+            const fs = document.getElementById('filter-siri').value, fk = document.getElementById('filter-kelas').value;
             const sel = document.getElementById('sel-std');
             sel.innerHTML = '<option value="">-- PILIH PELAJAR --</option>';
             
-            // --- LOGIK SORTING ---
-            // Urutan: Kumpulan (Index 8) ASC, kemudian No Kumpulan (Index 9) ASC
+            // SORTING: Urutan No Kumpulan (Index 9)
             let filtered = assignedStudents.slice(1).filter(s => {
-                return (fs==='ALL'||String(s[7])===fs) && (fk==='ALL'||String(s[5])===fk) && (fg==='ALL'||String(s[8])===fg);
-            }).sort((a, b) => {
-                if (String(a[8]) !== String(b[8])) return String(a[8]).localeCompare(String(b[8]));
-                return (parseInt(a[9]) || 0) - (parseInt(b[9]) || 0);
-            });
+                return (fs==='ALL'||String(s[7])===fs) && (fk==='ALL'||String(s[2])===fk);
+            }).sort((a, b) => (parseInt(a[9])||0) - (parseInt(b[9])||0));
 
             filtered.forEach(s => {
-                sel.innerHTML += `<option value="${String(s[3]).trim()}">KUMP: ${s[8]} | NO: ${s[9]} | ${s[1].toUpperCase()}</option>`;
+                sel.innerHTML += `<option value="${String(s[3]).trim()}">NO: ${s[9]||'-'} | ${s[1].toUpperCase()}</option>`;
             });
         }
 
         function loadStudentMarking() {
             const ic = document.getElementById('sel-std').value;
+            // PEMBETULAN: Mencari markah berdasarkan IC di Indeks 3 (MARKAH Sheet)
             const s = assignedStudents.find(st => String(st[3]).trim() === String(ic).trim());
             if(!s) return;
             selectedStudentIC = String(s[3]).trim();
             document.getElementById('marking-panel').classList.remove('hidden');
-            document.getElementById('lec-std-info').classList.remove('hidden');
             document.getElementById('lec-std-pic').src = s[6] || "https://www.w3schools.com/howto/img_avatar.png";
             document.getElementById('info-nama').innerText = s[1];
             document.getElementById('info-ic').innerText = "IC: " + s[3];
             
-            // Isi data sedia ada
+            // Indeks Markah (MARKAH Sheet): HP4(13), HP5(14), HP3(15), HP8i(16), HP8k(17), Merit(18), Demerit(19)
             document.getElementById('m-hp4').value = s[13] || 0;
             document.getElementById('m-hp5').value = s[14] || 0;
             document.getElementById('m-hp3-total').innerText = s[15] || "0.0";
@@ -254,7 +247,7 @@
             reader.onload = (e) => {
                 const b64 = e.target.result.split(',')[1];
                 google.script.run.withSuccessHandler(url => {
-                    toggleLoad(false); document.getElementById('profile-pic').src = url; alert("Berjaya!");
+                    toggleLoad(false); document.getElementById('profile-pic').src = url; alert("Gambar Berjaya!");
                 }).uploadFileToDrive(b64, f.files[0].name, f.files[0].type, userProfile[3]);
             };
             reader.readAsDataURL(f.files[0]);
@@ -274,6 +267,7 @@
 
         function showAdmin(allData) {
             document.getElementById('screen-admin').classList.remove('hidden');
+            // Column Total Markah di Index 20
             const marks = allData.slice(1).map(r => parseFloat(r[20]) || 0).filter(m => m > 0);
             const grades = allData.slice(1).map(r => r[21]).filter(g => g);
             document.getElementById('adm-count').innerText = marks.length;
@@ -291,8 +285,8 @@
 
         function renderCharts(marks, grades) {
             const labels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'D', 'F'];
-            new Chart(document.getElementById('gradeChart'), { type:'bar', data:{ labels, datasets:[{ label:'Gred', data:labels.map(l=>grades.filter(g=>g===l).length), backgroundColor:'#fbbf24' }] }});
-            new Chart(document.getElementById('bellChart'), { type:'line', data:{ labels:[0,20,40,60,80,100], datasets:[{ label:'Taburan Normal', data:[0.1,0.5,2,5,2,0.5], borderColor:'#fbbf24', tension:0.4 }] }});
+            new Chart(document.getElementById('gradeChart'), { type:'bar', data:{ labels, datasets:[{ label:'Taburan Gred Pelajar', data:labels.map(l=>grades.filter(g=>g===l).length), backgroundColor:'#fbbf24' }] }});
+            new Chart(document.getElementById('bellChart'), { type:'line', data:{ labels:[0,20,40,60,80,100], datasets:[{ label:'Normal Distribution (Bell Curve)', data:[0.1,0.5,2,5,2,0.5], borderColor:'#fbbf24', tension:0.4 }] }});
         }
     </script>
 </body>

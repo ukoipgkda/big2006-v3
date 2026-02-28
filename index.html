@@ -7,20 +7,33 @@
     <style>
         body { background: #020617; color: white; font-family: sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
-        .input-box { background: #0f172a; border: 1px solid #334155; border-radius: 1rem; padding: 1rem; width: 100%; color: white; outline: none; transition: 0.3s; }
+        .input-box { background: #0f172a; border: 1px solid #334155; border-radius: 1rem; padding: 1rem; width: 100%; color: white; outline: none; }
         .img-frame { width: 150px; height: 190px; border: 3px solid #fbbf24; border-radius: 1.5rem; object-fit: cover; background: #1e293b; }
         .score-box { background: rgba(30, 41, 59, 0.8); border: 1px solid #fbbf24; border-radius: 1rem; padding: 1rem; text-align: center; }
         input[type=range] { accent-color: #fbbf24; cursor: pointer; width: 100%; }
+        /* Pop-up Rubrik */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); }
+        .modal-content { background: #0f172a; margin: 5% auto; padding: 2.5rem; border: 1px solid #fbbf24; width: 90%; max-width: 800px; border-radius: 2.5rem; max-height: 85vh; overflow-y: auto; box-shadow: 0 0 50px rgba(251, 191, 36, 0.1); }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div id="loading" class="fixed inset-0 bg-black/80 z-[100] hidden flex flex-col items-center justify-center text-center">
-        <div class="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
-        <p id="load-text" class="mt-4 text-yellow-500 font-bold text-xs uppercase italic tracking-widest">Sila Tunggu...</p>
+    <div id="loading" class="fixed inset-0 bg-black/90 z-[2000] hidden flex flex-col items-center justify-center text-center">
+        <div class="w-14 h-14 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-yellow-500 font-bold text-xs uppercase tracking-[0.3em]">Memproses Data...</p>
     </div>
 
-    <div id="screen-login" class="max-w-md mx-auto mt-20 glass p-10 text-center">
+    <div id="rubricModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <h2 id="rubricTitle" class="text-xl font-black text-yellow-500 uppercase italic tracking-wider">Rujukan Rubrik</h2>
+                <button onclick="closeRubric()" class="bg-red-600/20 text-red-500 px-4 py-1 rounded-full font-bold uppercase text-[10px] border border-red-500/50 hover:bg-red-600 hover:text-white transition-all">Tutup</button>
+            </div>
+            <div id="rubricBody" class="text-xs space-y-4 leading-relaxed text-gray-300"></div>
+        </div>
+    </div>
+
+    <div id="screen-login" class="max-w-md mx-auto mt-20 glass p-10 text-center text-left">
         <h1 class="text-3xl font-black text-yellow-500 mb-8 italic uppercase tracking-tighter">E-BIG PORTAL</h1>
         <div class="space-y-4 text-left">
             <input type="text" id="user-id" class="input-box" placeholder="IC Pelajar / Emel Staf">
@@ -33,16 +46,16 @@
     </div>
 
     <div id="screen-student" class="max-w-4xl mx-auto hidden glass p-10 mt-10">
-        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4 text-left">
             <h2 class="text-xl font-black text-yellow-500 uppercase italic">BIODATA PELAJAR</h2>
-            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold">KELUAR</button>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold uppercase">KELUAR</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 text-left">
             <div class="md:col-span-4 flex flex-col items-center gap-4 text-center">
                 <img id="profile-pic" src="https://www.w3schools.com/howto/img_avatar.png" class="img-frame shadow-2xl">
                 <div class="w-full">
                     <input type="file" id="fileInput" accept="image/*" class="text-[10px] mb-2 block w-full">
-                    <button onclick="uploadImage()" class="w-full bg-blue-500 py-2 rounded-lg text-[10px] font-bold uppercase">KEMASKINI GAMBAR</button>
+                    <button onclick="uploadImage()" class="w-full bg-blue-600 py-2 rounded-lg text-[10px] font-bold uppercase">KEMASKINI GAMBAR</button>
                 </div>
             </div>
             <div class="md:col-span-8 space-y-4 text-left">
@@ -51,60 +64,73 @@
                     <select id="std-kump" class="input-box text-xs font-bold uppercase"><option value="GREY">GREY</option><option value="BIRU">BIRU</option><option value="HIJAU">HIJAU</option><option value="MERAH">MERAH</option></select>
                 </div>
                 <input type="number" id="std-no" class="input-box" placeholder="No. Dalam Kumpulan">
-                <input type="text" id="std-alahan" class="input-box" placeholder="Alahan / Perubatan">
+                <input type="text" id="std-alahan" class="input-box" placeholder="Jenis Alahan / Ubat">
                 <input type="text" id="std-sos" class="input-box" placeholder="No. Tel Waris">
-                <button onclick="updateStudent()" class="w-full bg-green-600 p-4 rounded-xl font-black uppercase shadow-lg">SIMPAN PROFIL BIODATA</button>
+                <button onclick="updateStudent()" class="w-full bg-green-600 p-4 rounded-xl font-black uppercase shadow-lg">SIMPAN PROFIL</button>
             </div>
         </div>
     </div>
 
     <div id="screen-lecturer" class="max-w-6xl mx-auto hidden glass p-10 mt-10 text-left">
-        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
-            <h2 class="text-xl font-black text-yellow-500 uppercase italic italic">PANEL PENILAI: <span id="lec-name-disp"></span></h2>
-            <button onclick="location.reload()" class="bg-red-600 px-4 py-2 rounded-xl font-bold text-[10px]">KELUAR</button>
+        <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-6 text-left">
+            <h2 class="text-xl font-black text-yellow-500 uppercase italic">PANEL PENILAI: <span id="lec-name-disp"></span></h2>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-2 rounded-xl font-bold text-[10px] uppercase">LOG KELUAR</button>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
             <div class="lg:col-span-4 space-y-4">
                 <div class="bg-slate-800/50 p-6 rounded-2xl border border-white/5 shadow-lg">
-                    <h3 class="text-[10px] font-bold text-yellow-500 uppercase mb-4 italic">TAPIS PELAJAR</h3>
-                    <select id="filter-siri" onchange="filterStudents()" class="input-box text-xs mb-2 uppercase"></select>
-                    <select id="filter-kelas" onchange="filterStudents()" class="input-box text-xs mb-2 uppercase"></select>
-                    <select id="filter-kump" onchange="filterStudents()" class="input-box text-xs mb-2 uppercase"></select>
-                    <div class="pt-4 border-t border-white/10 mt-2 text-left">
-                        <label class="text-[10px] font-bold opacity-50 mb-1 block uppercase">Pilih Pelajar (Susunan No. Kump)</label>
-                        <select id="sel-std" onchange="loadStudentMarking()" class="input-box text-xs bg-blue-900/50 uppercase"></select>
+                    <h3 class="text-[10px] font-bold text-yellow-500 uppercase mb-4 italic">TAPISAN HIERARKI</h3>
+                    <div class="space-y-3">
+                        <label class="text-[9px] opacity-50 block uppercase font-bold">1. Siri BIG</label>
+                        <select id="filter-siri" onchange="updateKelasDropdown()" class="input-box text-xs uppercase"></select>
+                        
+                        <label class="text-[9px] opacity-50 block uppercase font-bold">2. Kelas Terlibat</label>
+                        <select id="filter-kelas" onchange="filterStudents()" class="input-box text-xs uppercase"></select>
+                        
+                        <div class="pt-4 border-t border-white/10 text-left">
+                            <label class="text-[10px] font-bold text-blue-400 mb-1 block uppercase italic">Pilih Pelajar (Susunan No. Kump)</label>
+                            <select id="sel-std" onchange="loadStudentMarking()" class="input-box text-xs bg-blue-900/50 uppercase"></select>
+                        </div>
                     </div>
                 </div>
                 <div class="flex flex-col items-center">
                     <img id="lec-std-pic" src="https://www.w3schools.com/howto/img_avatar.png" class="img-frame shadow-2xl">
                     <p id="info-nama" class="mt-3 font-black text-sm uppercase italic text-center text-yellow-500"></p>
-                    <p id="info-ic" class="text-[10px] font-bold text-gray-400"></p>
                 </div>
             </div>
             <div class="lg:col-span-8 hidden" id="marking-panel">
                 <div class="bg-slate-900/40 p-8 rounded-3xl border border-white/5 space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-black/30 p-4 rounded-xl text-left"><label class="text-[10px] opacity-50 font-bold uppercase">HP4 (Max 15)</label><input type="number" id="m-hp4" max="15" oninput="if(this.value>15)this.value=15" class="bg-transparent w-full text-lg font-bold outline-none text-yellow-500"></div>
-                        <div class="bg-black/30 p-4 rounded-xl text-left"><label class="text-[10px] opacity-50 font-bold uppercase">HP5 (Max 10)</label><input type="number" id="m-hp5" max="10" oninput="if(this.value>10)this.value=10" class="bg-transparent w-full text-lg font-bold outline-none text-yellow-500"></div>
+                    <div class="grid grid-cols-2 gap-4 text-left">
+                        <div class="bg-black/30 p-4 rounded-xl relative">
+                            <label class="text-[10px] opacity-50 font-bold uppercase flex justify-between">HP4 (Max 15) <button onclick="openRubric('HP4')" class="text-blue-400 text-[9px] underline">RUJUKAN</button></label>
+                            <input type="number" id="m-hp4" max="15" oninput="if(this.value>15)this.value=15" class="bg-transparent w-full text-lg font-bold outline-none text-yellow-500" value="0">
+                        </div>
+                        <div class="bg-black/30 p-4 rounded-xl relative">
+                            <label class="text-[10px] opacity-50 font-bold uppercase flex justify-between">HP5 (Max 10) <button onclick="openRubric('HP5')" class="text-blue-400 text-[9px] underline">RUJUKAN</button></label>
+                            <input type="number" id="m-hp5" max="10" oninput="if(this.value>10)this.value=10" class="bg-transparent w-full text-lg font-bold outline-none text-yellow-500" value="0">
+                        </div>
                     </div>
                     <div class="bg-slate-800/80 p-6 rounded-2xl border border-white/10 shadow-inner">
-                        <div class="flex justify-between items-center mb-4 text-left"><h3 class="text-xs font-black text-purple-400 uppercase italic">AMALI 2 (HP3)</h3><div class="text-xl font-black text-yellow-500"><span id="m-hp3-total">0.0</span> / 25</div></div>
-                        <div class="space-y-3">
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kecergasan (Max 3)</span><span id="v-s1" class="text-yellow-500">0</span></div><input type="range" id="s1" min="0" max="3" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Pemakanan (Max 4)</span><span id="v-s2" class="text-yellow-500">0</span></div><input type="range" id="s2" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kembara (Max 4)</span><span id="v-s3" class="text-yellow-500">0</span></div><input type="range" id="s3" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Keyakinan Air (Max 2)</span><span id="v-s4" class="text-yellow-500">0</span></div><input type="range" id="s4" min="0" max="2" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Rakit/Kayak (Max 6)</span><span id="v-s5" class="text-yellow-500">0</span></div><input type="range" id="s5" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
-                            <div><div class="flex justify-between text-[10px] font-bold"><span>Tali Tinggi (Max 6)</span><span id="v-s6" class="text-yellow-500">0</span></div><input type="range" id="s6" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xs font-black text-purple-400 uppercase italic">AMALI 2 (HP3) <button onclick="openRubric('HP3')" class="ml-2 text-blue-400 text-[9px] underline font-bold">INFO RUBRIK</button></h3>
+                            <div class="text-xl font-black text-yellow-500"><span id="m-hp3-total">0.0</span> / 25</div>
+                        </div>
+                        <div class="space-y-4">
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kecergasan (Max 3)</span><span id="v-s1" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s1" min="0" max="3" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Pemakanan (Max 4)</span><span id="v-s2" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s2" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Kembara (Max 4)</span><span id="v-s3" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s3" min="0" max="4" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Keyakinan Air (Max 2)</span><span id="v-s4" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s4" min="0" max="2" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Rakit/Kayak (Max 6)</span><span id="v-s5" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s5" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
+                            <div><div class="flex justify-between text-[10px] font-bold"><span>Tali Tinggi (Max 6)</span><span id="v-s6" class="text-yellow-500 font-bold">0</span></div><input type="range" id="s6" min="0" max="6" step="0.1" value="0" oninput="calcHP3()"></div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
-                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] opacity-50 uppercase font-bold">HP8 Indv (Max 20)</label><input type="number" id="m-hp8i" max="20" oninput="if(this.value>20)this.value=20" class="bg-transparent w-full font-bold text-yellow-500 outline-none"></div>
-                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] opacity-50 uppercase font-bold">HP8 Kump (Max 30)</label><input type="number" id="m-hp8k" max="30" oninput="if(this.value>30)this.value=30" class="bg-transparent w-full font-bold text-yellow-500 outline-none"></div>
-                        <div class="bg-green-600/20 p-3 rounded-xl border border-green-500/30"><label class="text-[9px] text-green-500 font-bold uppercase">Merit (+)</label><input type="number" id="m-merit" class="bg-transparent w-full font-bold text-green-500 outline-none" value="0"></div>
-                        <div class="bg-red-600/20 p-3 rounded-xl border border-red-500/30"><label class="text-[9px] text-red-400 font-bold uppercase">Demerit (-)</label><input type="number" id="m-demerit" class="bg-transparent w-full font-bold text-red-500 outline-none" value="0"></div>
+                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] opacity-50 uppercase font-bold flex justify-between">HP8 Ind (Max 20) <button onclick="openRubric('HP8I')" class="text-blue-400">INFO</button></label><input type="number" id="m-hp8i" max="20" oninput="if(this.value>20)this.value=20" class="bg-transparent w-full font-bold text-yellow-500 outline-none" value="0"></div>
+                        <div class="bg-black/30 p-3 rounded-xl"><label class="text-[9px] opacity-50 uppercase font-bold flex justify-between">HP8 Kum (Max 30) <button onclick="openRubric('HP8K')" class="text-blue-400">INFO</button></label><input type="number" id="m-hp8k" max="30" oninput="if(this.value>30)this.value=30" class="bg-transparent w-full font-bold text-yellow-500 outline-none" value="0"></div>
+                        <div class="bg-green-600/20 p-3 rounded-xl border border-green-500/30 text-left"><label class="text-[9px] text-green-500 font-bold uppercase">Merit (+)</label><input type="number" id="m-merit" class="bg-transparent w-full font-bold text-green-500 outline-none" value="0"></div>
+                        <div class="bg-red-600/20 p-3 rounded-xl border border-red-500/30 text-left"><label class="text-[9px] text-red-400 font-bold uppercase">Demerit (-)</label><input type="number" id="m-demerit" class="bg-transparent w-full font-bold text-red-500 outline-none" value="0"></div>
                     </div>
-                    <button onclick="saveMarking()" class="w-full bg-yellow-500 text-black p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400">SAHKAN MARKAH</button>
+                    <button onclick="saveMarking()" class="w-full bg-yellow-500 text-black p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-yellow-400 shadow-xl transition-all">SAHKAN & SIMPAN MARKAH</button>
                 </div>
             </div>
         </div>
@@ -112,14 +138,14 @@
 
     <div id="screen-admin" class="max-w-6xl mx-auto hidden glass p-10 mt-10 text-center">
         <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
-            <h2 class="text-xl font-black text-yellow-500 uppercase italic">ADMIN: EN. HANIFF FAIZAL</h2>
-            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold">KELUAR</button>
+            <h2 class="text-xl font-black text-yellow-500 uppercase italic tracking-wider">ADMIN Dashboard: En. Haniff Faizal</h2>
+            <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded text-[10px] font-bold uppercase">LOG KELUAR</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="score-box"><p class="text-xs opacity-60">MIN</p><p id="adm-mean" class="text-3xl font-black text-green-500">0.0</p></div>
-            <div class="score-box"><p class="text-xs opacity-60">MEDIAN</p><p id="adm-median" class="text-3xl font-black text-blue-500">0.0</p></div>
-            <div class="score-box"><p class="text-xs opacity-60">MOD</p><p id="adm-mode" class="text-3xl font-black text-purple-500">0.0</p></div>
-            <div class="score-box"><p class="text-xs opacity-60">JUMLAH</p><p id="adm-count" class="text-3xl font-black text-yellow-500">0</p></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 text-white">
+            <div class="score-box"><p class="text-xs opacity-60 font-bold uppercase">Min (Mean)</p><p id="adm-mean" class="text-3xl font-black text-green-500">0.0</p></div>
+            <div class="score-box"><p class="text-xs opacity-60 font-bold uppercase">Median</p><p id="adm-median" class="text-3xl font-black text-blue-500">0.0</p></div>
+            <div class="score-box"><p class="text-xs opacity-60 font-bold uppercase">Mod (Mode)</p><p id="adm-mode" class="text-3xl font-black text-purple-500">0.0</p></div>
+            <div class="score-box"><p class="text-xs opacity-60 font-bold uppercase">Bilangan Pelajar</p><p id="adm-count" class="text-3xl font-black text-yellow-500">0</p></div>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div class="bg-white/5 p-6 rounded-3xl border border-white/10"><canvas id="gradeChart"></canvas></div>
@@ -131,32 +157,69 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbxfaG5VInNW0Yu16mqTVI-RcdbTNBEqxelA3TBvcjYDRPh96iYacnOmxolOzbgi3Yu9/exec";
         let userProfile = null, assignedStudents = [], selectedStudentIC = null;
 
-        function toggleLoad(s, t="Memproses Data...") { 
-            document.getElementById('loading').classList.toggle('hidden', !s); 
-            document.getElementById('load-text').innerText = t;
-        }
+        const rubrikData = {
+            HP3: `<h3 class='text-yellow-500 font-black mb-3'>AMALI 2: HP3 KEMAHIRAN PRAKTIKAL (25%) [cite: 2]</h3>
+                  <ul class='space-y-3'>
+                    <li><b>Amat Cemerlang (22.5-25.0):</b> Daya tahan fizikal & hubungan sangat cemerlang sesama ahli. Bersemangat & suri teladan kerja berpasukan[cite: 3].</li>
+                    <li><b>Cemerlang (18.8-22.4):</b> Hubungan cemerlang & berkeupayaan memikul tanggungjawab penuh secara berkesan[cite: 3].</li>
+                    <li><b>Kepujian (15.0-18.7):</b> Hubungan baik & dapat memainkan peranan pasukan dengan baik[cite: 3].</li>
+                    <li><b>Lulus (12.5-14.9):</b> Hubungan sederhana baik. Tanggungjawab minimum dengan bimbingan[cite: 3].</li>
+                    <li><b>Lemah (< 12.5):</b> Hubungan kurang baik. Sangat minimum & perlu bimbingan lebih[cite: 3].</li>
+                  </ul>`,
+            HP4: `<h3 class='text-yellow-500 font-black mb-3'>AMALI 1: HP4 INTERPERSONAL (10%) [cite: 23]</h3>
+                  <ul class='space-y-3'>
+                    <li><b>Amat Cemerlang (9.0-10.0):</b> Suri teladan interpersonal terpuji & impak global. Sangat berjaya mengamalkan tingkah laku positif[cite: 37].</li>
+                    <li><b>Cemerlang (7.5-8.9):</b> Beketerampilan baik & berkeyakinan membudayakan perkongsian ilmu[cite: 37].</li>
+                    <li><b>Kepujian (6.0-7.4):</b> Memuaskan dalam beketerampilan & mampu berkolaboratif[cite: 37].</li>
+                    <li><b>Lulus (5.0-5.9):</b> Kurang memuaskan, interpersonal secara terhad[cite: 37].</li>
+                    <li><b>Lemah (< 4.9):</b> Tidak berketerampilan & tidak berkeyakinan kolaboratif[cite: 37].</li>
+                  </ul>`,
+            HP5: `<h3 class='text-yellow-500 font-black mb-3'>AMALI 1: HP5 BERKOMUNIKASI (10%) [cite: 31]</h3>
+                  <ul class='space-y-3'>
+                    <li><b>Amat Cemerlang (9.0-10.0):</b> Idea sangat jelas, koheren & petah berhujah bukti bermaklumat (Evidence Informed)[cite: 29].</li>
+                    <li><b>Cemerlang (7.5-8.9):</b> Idea jelas & yakin berhujah berdasarkan bukti (Evidence Based)[cite: 29].</li>
+                    <li><b>Kepujian (6.0-7.4):</b> Idea baik namun perlu sedikit penambahbaikan[cite: 29].</li>
+                    <li><b>Lulus (5.0-5.9):</b> Kurang jelas, kurang koheren & jawapan kurang tepat soalan[cite: 29].</li>
+                    <li><b>Lemah (< 4.9):</b> Idea tidak jelas, tidak memahami & tidak menjawab soalan[cite: 29].</li>
+                  </ul>`,
+            HP8I: `<h3 class='text-yellow-500 font-black mb-3'>HP8: INDIVIDU (15%) [cite: 8]</h3>
+                   <ul class='space-y-3'>
+                     <li><b>Amat Cemerlang (13.5-15.0):</b> Sikap aktif & positif sangat konsisten. Sangat bijak bertindak jujur & mengekal prinsip akauntabiliti[cite: 9].</li>
+                     <li><b>Cemerlang (11.3-13.4):</b> Sikap aktif tinggi. Bijak bertindak jujur & bertanggungjawab[cite: 9].</li>
+                     <li><b>Kepujian (9.0-11.2):</b> Sikap aktif & positif semasa tugasan. Boleh bertindak jujur[cite: 9].</li>
+                     <li><b>Lulus (7.5-8.9):</b> Kurang aktif & memerlukan bantuan untuk jujur[cite: 9].</li>
+                     <li><b>Lemah (< 7.5):</b> Amat kurang aktif & mudah putus asa[cite: 9].</li>
+                   </ul>`,
+            HP8K: `<h3 class='text-yellow-500 font-black mb-3'>HP8: KUMPULAN (30%) [cite: 19]</h3>
+                   <ul class='space-y-3'>
+                     <li><b>Amat Cemerlang (27.0-30.0):</b> Hubungan ahli sangat cemerlang. Sentiasa menunjukkan sikap aktif yang konsisten[cite: 20].</li>
+                     <li><b>Cemerlang (22.5-26.9):</b> Mempamerkan daya tahan fizikal & hubungan cemerlang sesama ahli[cite: 20].</li>
+                     <li><b>Kepujian (18.0-22.4):</b> Hubungan baik & menunjukkan sikap kebergantungan diri sendiri secara umum[cite: 20, 21].</li>
+                     <li><b>Lulus (15.0-17.9):</b> Hubungan sederhana baik. Memerlukan bantuan untuk jujur[cite: 20].</li>
+                     <li><b>Lemah (< 15.0):</b> Hubungan kurang baik & mudah putus asa[cite: 20].</li>
+                   </ul>`
+        };
+
+        function openRubric(k) { document.getElementById('rubricBody').innerHTML = rubrikData[k]; document.getElementById('rubricModal').style.display = 'block'; }
+        function closeRubric() { document.getElementById('rubricModal').style.display = 'none'; }
+        function toggleLoad(s) { document.getElementById('loading').classList.toggle('hidden', !s); }
 
         async function auth(type) {
-            const id = document.getElementById('user-id').value;
-            const pw = document.getElementById('user-pass').value;
-            toggleLoad(true, "Menyemak Identiti...");
+            const id = document.getElementById('user-id').value, pw = document.getElementById('user-pass').value;
+            toggleLoad(true);
             try {
                 const action = (type === 'student') ? "login_student" : "login_lecturer";
                 const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action, email: id, no_kp: id, password: pw }) });
                 const d = await res.json(); toggleLoad(false);
                 if(d.result === 'success') {
                     document.getElementById('screen-login').classList.add('hidden');
-                    if(d.data.role === "admin") {
-                        showAdmin(d.data.allData);
-                    } else if(type === 'student') {
+                    if(d.data.role === "admin") { showAdmin(d.data.allData); } 
+                    else if(type === 'student') {
                         userProfile = d.data.profile;
                         document.getElementById('screen-student').classList.remove('hidden');
                         document.getElementById('profile-pic').src = userProfile[6] || "https://www.w3schools.com/howto/img_avatar.png";
                         document.getElementById('std-siri').value = userProfile[7] || "4";
                         document.getElementById('std-kump').value = userProfile[8] || "GREY";
-                        document.getElementById('std-no').value = userProfile[9] || "";
-                        document.getElementById('std-alahan').value = userProfile[10] || "";
-                        document.getElementById('std-sos').value = userProfile[12] || "";
                     } else {
                         document.getElementById('screen-lecturer').classList.remove('hidden');
                         document.getElementById('lec-name-disp').innerText = d.data.name;
@@ -164,30 +227,38 @@
                         populateFilters();
                     }
                 } else alert(d.message);
-            } catch(e) { toggleLoad(false); alert("Ralat Rangkaian! Sila kemaskini Deployment."); }
+            } catch(e) { toggleLoad(false); alert("Ralat Rangkaian!"); }
         }
 
+        // FUNGSI PENAPISAN HIERARKI (SIRI -> KELAS)
         function populateFilters() {
-            const siri = new Set(), kelas = new Set(), kump = new Set();
-            assignedStudents.slice(1).forEach(s => { 
-                if(s[7]) siri.add(String(s[7])); if(s[5]) kelas.add(String(s[5])); if(s[8]) kump.add(String(s[8]));
+            const siriSet = new Set();
+            assignedStudents.slice(1).forEach(s => { if(s[7]) siriSet.add(String(s[7])); });
+            const siriSel = document.getElementById('filter-siri');
+            siriSel.innerHTML = '<option value="ALL">SEMUA SIRI</option>';
+            [...siriSet].sort().forEach(v => siriSel.innerHTML += `<option value="${v}">${v}</option>`);
+            updateKelasDropdown();
+        }
+
+        function updateKelasDropdown() {
+            const fs = document.getElementById('filter-siri').value;
+            const kelasSet = new Set();
+            assignedStudents.slice(1).forEach(s => {
+                if(fs === 'ALL' || String(s[7]) === fs) { if(s[5]) kelasSet.add(String(s[5])); }
             });
-            const fill = (id, set, lbl) => {
-                const el = document.getElementById(id);
-                el.innerHTML = `<option value="ALL">SEMUA ${lbl}</option>`;
-                [...set].sort().forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
-            };
-            fill('filter-siri', siri, 'SIRI'); fill('filter-kelas', kelas, 'KELAS'); fill('filter-kump', kump, 'KUMPULAN');
+            const kelasSel = document.getElementById('filter-kelas');
+            kelasSel.innerHTML = '<option value="ALL">SEMUA KELAS</option>';
+            [...kelasSet].sort().forEach(v => kelasSel.innerHTML += `<option value="${v}">${v}</option>`);
             filterStudents();
         }
 
         function filterStudents() {
-            const fs = document.getElementById('filter-siri').value, fk = document.getElementById('filter-kelas').value, fg = document.getElementById('filter-kump').value;
+            const fs = document.getElementById('filter-siri').value, fk = document.getElementById('filter-kelas').value;
             const sel = document.getElementById('sel-std');
             sel.innerHTML = '<option value="">-- PILIH PELAJAR --</option>';
             let filtered = assignedStudents.slice(1).filter(s => {
-                return (fs==='ALL'||String(s[7])===fs) && (fk==='ALL'||String(s[5])===fk) && (fg==='ALL'||String(s[8])===fg);
-            }).sort((a, b) => (parseInt(a[9])||0) - (parseInt(b[9])||0));
+                return (fs === 'ALL' || String(s[7]) === fs) && (fk === 'ALL' || String(s[5]) === fk);
+            }).sort((a, b) => (parseInt(a[9]) || 0) - (parseInt(b[9]) || 0));
             filtered.forEach(s => sel.innerHTML += `<option value="${String(s[3]).trim()}">NO: ${s[9]||'-'} | ${s[1].toUpperCase()}</option>`);
         }
 
@@ -199,7 +270,6 @@
             document.getElementById('marking-panel').classList.remove('hidden');
             document.getElementById('lec-std-pic').src = s[6] || "https://www.w3schools.com/howto/img_avatar.png";
             document.getElementById('info-nama').innerText = s[1];
-            document.getElementById('info-ic').innerText = "IC: " + s[3];
             document.getElementById('m-hp4').value = s[13] || 0;
             document.getElementById('m-hp5').value = s[14] || 0;
             document.getElementById('m-hp3-total').innerText = s[15] || "0.0";
@@ -220,7 +290,7 @@
         }
 
         async function saveMarking() {
-            toggleLoad(true, "Menyimpan Markah...");
+            toggleLoad(true);
             const payload = {
                 action: "save_mark", no_kp: selectedStudentIC,
                 hp4: document.getElementById('m-hp4').value, hp5: document.getElementById('m-hp5').value,
@@ -235,19 +305,19 @@
         function uploadImage() {
             const f = document.getElementById('fileInput');
             if(f.files.length === 0) return alert("Pilih gambar!");
-            toggleLoad(true, "Memuat Naik Gambar...");
+            toggleLoad(true);
             const reader = new FileReader();
             reader.onload = (e) => {
                 const b64 = e.target.result.split(',')[1];
                 google.script.run.withSuccessHandler(url => {
-                    toggleLoad(false); document.getElementById('profile-pic').src = url; alert("Gambar Berjaya!");
+                    toggleLoad(false); document.getElementById('profile-pic').src = url; alert("Berjaya!");
                 }).uploadFileToDrive(b64, f.files[0].name, f.files[0].type, userProfile[3]);
             };
             reader.readAsDataURL(f.files[0]);
         }
 
         async function updateStudent() {
-            toggleLoad(true, "Mengemaskini Biodata...");
+            toggleLoad(true);
             const payload = {
                 action: "full_update_student", no_kp: userProfile[3],
                 siri: document.getElementById('std-siri').value, kump: document.getElementById('std-kump').value,
@@ -276,8 +346,8 @@
 
         function renderCharts(marks, grades) {
             const labels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'D', 'F'];
-            new Chart(document.getElementById('gradeChart'), { type:'bar', data:{ labels, datasets:[{ label:'Gred', data:labels.map(l=>grades.filter(g=>g===l).length), backgroundColor:'#fbbf24' }] }});
-            new Chart(document.getElementById('bellChart'), { type:'line', data:{ labels:[0,20,40,60,80,100], datasets:[{ label:'Taburan', data:[0.1,0.5,2,5,2,0.5], borderColor:'#fbbf24', tension:0.4 }] }});
+            new Chart(document.getElementById('gradeChart'), { type:'bar', data:{ labels, datasets:[{ label:'Taburan Gred', data:labels.map(l=>grades.filter(g=>g===l).length), backgroundColor:'#fbbf24' }] }});
+            new Chart(document.getElementById('bellChart'), { type:'line', data:{ labels:[0,20,40,60,80,100], datasets:[{ label:'Taburan Normal', data:[0.1,0.5,2,5,2,0.5], borderColor:'#fbbf24', tension:0.4 }] }});
         }
     </script>
 </body>
